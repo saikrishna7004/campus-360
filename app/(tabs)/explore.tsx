@@ -91,6 +91,26 @@ export default function TabTwoScreen() {
           ),
         })}
       </Collapsible>
+      <Collapsible title="Canteen Management">
+        <ThemedText>
+          Manage the canteen services and orders.
+        </ThemedText>
+      </Collapsible>
+      <Collapsible title="Library Management">
+        <ThemedText>
+          Manage the library resources and services.
+        </ThemedText>
+      </Collapsible>
+      <Collapsible title="Stationary Management">
+        <ThemedText>
+          Manage the stationary items and orders.
+        </ThemedText>
+      </Collapsible>
+      <Collapsible title="Office Works Management">
+        <ThemedText>
+          Manage the office works and tasks.
+        </ThemedText>
+      </Collapsible>
     </ParallaxScrollView>
   );
 }

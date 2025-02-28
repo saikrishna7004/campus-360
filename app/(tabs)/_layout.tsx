@@ -1,45 +1,49 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { FontAwesome } from '@expo/vector-icons'
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import Canteen from './canteen'
+import Library from './library'
+import Stationary from './stationary'
+import Office from './office'
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const Tab = createBottomTabNavigator()
 
+export default function TabsLayout() {
   return (
-    <Tabs
+    <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
+        tabBarShowLabel: false,
+      }}
+    >
+      <Tab.Screen
+        name="Canteen"
+        component={Canteen}
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, size }) => <FontAwesome name="cutlery" size={size} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="explore"
+      <Tab.Screen
+        name="Library"
+        component={Library}
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, size }) => <FontAwesome name="book" size={size} color={color} />,
         }}
       />
-    </Tabs>
-  );
+      <Tab.Screen
+        name="Stationary"
+        component={Stationary}
+        options={{
+          tabBarIcon: ({ color, size }) => <FontAwesome name="pencil" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Office"
+        component={Office}
+        options={{
+          tabBarIcon: ({ color, size }) => <FontAwesome name="briefcase" size={size} color={color} />,
+        }}
+      />
+    </Tab.Navigator>
+  )
 }
