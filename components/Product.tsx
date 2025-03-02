@@ -15,7 +15,7 @@ const Product = ({ item }: { item: ProductItem }) => {
 
     return (
         <View className="flex-row justify-between items-center px-4 py-2">
-            <Image className="rounded-lg" width={60} height={60} source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }} />
+            <Image className="rounded-lg h-[60px] w-[60px]" width={60} height={60} source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }} />
             <View className="flex-1 px-4">
                 <Text className="font-semibold pb-1 text-black">{item.name}</Text>
                 <Text className="text-md text-black">₹{item.price}</Text>
@@ -42,8 +42,8 @@ const Product = ({ item }: { item: ProductItem }) => {
                         onPress={() => addToCart(item)}
                         className='flex flex-row px-6 py-2 border border-green-800 rounded-lg items-center justify-center bg-green-50'
                     >
-                        <View className='text-green-700 gap-2 text-lg font-bold flex flex-row justify-center items-center'>
-                            <Text className='text-green-700 ps-1'>ADD</Text><FontAwesome name="plus" color='#166534' />
+                        <View className='text-green-700 gap-2 flex flex-row justify-center items-center'>
+                            <Text className='text-green-700 font-semibold ps-1'>ADD</Text><FontAwesome name="plus" color='#166534' />
                         </View>
                     </TouchableOpacity>
 

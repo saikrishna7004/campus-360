@@ -1,6 +1,6 @@
 // CategorySection.tsx
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native'
 import { FontAwesome } from '@expo/vector-icons'
 import Product, { ProductItem } from '@/components/Product'
 
@@ -14,7 +14,7 @@ interface CategorySectionProps {
 const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, toggleCategory, products }) => {
 
     return (
-        <View>
+        <SafeAreaView className="flex-1">
             <TouchableOpacity onPress={() => toggleCategory(category)} className="p-4 flex-row justify-between items-center">
                 <Text className="text-xl font-bold">{category}</Text>
                 <Text className={`text-xl me-4 ${expanded ? 'rotate-90' : ''}`}>
@@ -30,7 +30,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, t
                     })}
                 </View>
             )}
-        </View>
+        </SafeAreaView>
     )
 }
 
