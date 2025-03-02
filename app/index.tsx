@@ -24,7 +24,7 @@ const Home = () => {
 
                 <TouchableOpacity onPress={() => router.push('/stationary')} style={styles.card} className="bg-yellow-500 p-6 rounded-xl shadow-lg flex justify-center items-center">
                     <MaterialCommunityIcons name="pencil" size={40} color="white" />
-                    <Text className="text-white text-lg mt-4">Stationary</Text>
+                    <Text className="text-white text-lg mt-4">Stationery</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => router.push('/office')} style={styles.card} className="bg-gray-600 p-6 rounded-xl shadow-lg flex justify-center items-center">
