@@ -47,7 +47,6 @@ const Canteen: React.FC = () => {
             Alert.alert('Error', 'Your cart is empty!')
             return
         }
-        console.log(cart)
         Alert.alert('Order Placed', `You have ordered ${cart.length} items.`)
         clearCart()
     }
@@ -70,10 +69,10 @@ const Canteen: React.FC = () => {
                     const itemInCart = cart.find((cartItem) => cartItem.id === item.id)
 
                     return (
-                        <View className="flex-row justify-between items-center mb-4 p-4 bg-white dark:bg-gray-800">
+                        <View className="flex-row justify-between items-center mb-4 p-4 bg-gray-100 dark:bg-zinc-800 rounded-lg">
                             <View className="flex-1">
-                                <Text className="text-lg text-black font-bold dark:text-white">{item.name}</Text>
-                                <Text className="text-md text-black font-bold dark:text-white">${item.price}</Text>
+                                <Text className="text-lg font-bold text-black dark:text-white">{item.name}</Text>
+                                <Text className="text-md font-bold text-black dark:text-white">${item.price}</Text>
                             </View>
                             <View className="flex-row items-center space-x-2">
                                 {itemInCart ? (
@@ -115,7 +114,7 @@ const Canteen: React.FC = () => {
                 </View>
                 <View className="flex-row justify-between items-center mb-2 gap-2">
                     <TouchableOpacity
-                        onPress={() => router.push('./cart')}
+                        onPress={() => router.push('/cart')}
                         className="w-1/2 py-2 bg-green-500 dark:bg-green-700 rounded-lg"
                     >
                         <Text className="text-white text-center text-lg">View Cart</Text>
