@@ -60,7 +60,7 @@ const Stationery: React.FC = () => {
                 <View className="flex flex-row me-2">
                     <View className="w-[80%]">
                         <Text className="text-2xl font-bold mb-2 px-4">Stationery</Text>
-                        <Text className="text-sm text-gray-500 mb-4 px-4">Food and Snacks by Srinivas Uncle Team with their experience of serving KMIT for over 17+ years.</Text>
+                        <Text className="text-sm text-gray-500 mb-4 px-4">Get all your stationery needs, from pens to notebooks, all in one place inside our very own KMIT.</Text>
                     </View>
                     <View className="flex-1 w-[100px] items-center">
                         <View className="flex-row items-center bg-green-800 rounded-lg my-2 py-2 px-3 h-[40px] justify-center">
