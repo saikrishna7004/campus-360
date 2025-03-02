@@ -32,6 +32,21 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "@/fonts/metropolis/Metropolis-Regular.otf",
+            "@/fonts/metropolis/Metropolis-Bold.otf",
+            "@/fonts/metropolis/Metropolis-ExtraBold.otf",
+            "@/fonts/metropolis/Metropolis-SemiBold.otf",
+            "@/fonts/metropolis/Metropolis-Medium.otf",
+            "@/fonts/metropolis/Metropolis-Light.otf",
+            "@/fonts/metropolis/Metropolis-Thin.otf",
+            "@/fonts/metropolis/Metropolis-Black.otf"
+          ]
+        }
       ]
     ],
     "experiments": {

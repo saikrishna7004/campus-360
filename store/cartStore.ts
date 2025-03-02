@@ -11,18 +11,14 @@ interface CartItem extends Product {
 }
 
 interface CartStore {
-    products: Product[]
     cart: CartItem[]
-    addProduct: (product: Product) => void
     addToCart: (product: Product) => void
-    removeFromCart: (productId: number) => void
+    removeFromCart: (productId: Product) => void
     clearCart: () => void
 }
 
 const useCartStore = create<CartStore>((set) => ({
-    products: [],
     cart: [],
-    addProduct: (product) => set((state) => ({ products: [...state.products, product] })),
     addToCart: (product) => set((state) => {
         const itemIndex = state.cart.findIndex((item) => item.id === product.id)
         if (itemIndex >= 0) {
@@ -33,9 +29,18 @@ const useCartStore = create<CartStore>((set) => ({
             return { cart: [...state.cart, { ...product, quantity: 1 }] }
         }
     }),
-    removeFromCart: (productId) => set((state) => ({
-        cart: state.cart.filter((item) => item.id !== productId)
-    })),
+    removeFromCart: (product) => set((state) => {
+        const itemIndex = state.cart.findIndex((item) => item.id === product.id)
+        if (itemIndex >= 0) {
+            const updatedCart = [...state.cart]
+            updatedCart[itemIndex].quantity -= 1
+            if (updatedCart[itemIndex].quantity === 0) {
+                updatedCart.splice(itemIndex, 1)
+            }
+            return { cart: updatedCart }
+        }
+        return { cart: state.cart }
+    }),
     clearCart: () => set({ cart: [] })
 }))
 

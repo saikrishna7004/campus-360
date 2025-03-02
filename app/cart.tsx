@@ -21,29 +21,29 @@ const Cart = () => {
     const totalPrice = cart.reduce((acc: number, item: { price: number; quantity: number }) => acc + item.price * item.quantity, 0)
 
     return (
-        <SafeAreaView className="flex-1 bg-white dark:bg-black p-4">
-            <Text className="text-3xl font-bold text-black dark:text-white mb-4">Your Cart</Text>
+        <SafeAreaView className="flex-1 bg-white">
+            <Text className="text-3xl font-bold text-black mb-4">Your Cart</Text>
             <FlatList
                 data={cart}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                    <View className="flex-row justify-between items-center mb-4 p-4 bg-white dark:bg-gray-800">
+                    <View className="flex-row justify-between items-center mb-4 p-4 bg-white">
                         <View className="flex-1">
-                            <Text className="text-lg text-black font-bold dark:text-white">{item.name}</Text>
-                            <Text className="text-md text-black font-bold dark:text-white">${item.price}</Text>
-                            <Text className="text-md text-black font-bold dark:text-white">Quantity: {item.quantity}</Text>
+                            <Text className="text-lg text-black font-bold">{item.name}</Text>
+                            <Text className="text-md text-black font-bold">${item.price}</Text>
+                            <Text className="text-md text-black font-bold">Quantity: {item.quantity}</Text>
                         </View>
                     </View>
                 )}
             />
-            <View className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 shadow-lg">
+            <View className="absolute bottom-0 left-0 right-0 p-4 bg-white shadow-lg">
                 <View className="flex-row justify-between items-center mb-2">
-                    <Text className="text-xl text-black dark:text-white">Total Price</Text>
-                    <Text className="text-lg text-black dark:text-white">${totalPrice}</Text>
+                    <Text className="text-xl text-black">Total Price</Text>
+                    <Text className="text-lg text-black">${totalPrice}</Text>
                 </View>
                 <TouchableOpacity
                     onPress={placeOrder}
-                    className="w-full py-4 bg-blue-500 dark:bg-blue-700 rounded-lg"
+                    className="w-full py-4 bg-blue-500 rounded-lg"
                 >
                     <Text className="text-white text-center text-lg">Place Order</Text>
                 </TouchableOpacity>
