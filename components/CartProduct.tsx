@@ -1,39 +1,40 @@
 import useCartStore from '@/store/cartStore'
-import { View, Image, Text, TouchableOpacity } from 'react-native'
+import { FontAwesome } from '@expo/vector-icons'
+import { View, Text, TouchableOpacity } from 'react-native'
 
-interface ProductItem {
+interface CartProductItem {
     id: number
     name: string
     price: number
-    category: string
+    category?: string
 }
 
-const Product = ({ item }: { item: ProductItem }) => {
+const CartProduct = ({ item }: { item: CartProductItem }) => {
     const { cart, addToCart, removeFromCart } = useCartStore()
     const itemInCart = cart.find((cartItem) => cartItem.id === item.id)
 
     return (
-        <View className="flex-row justify-between items-center px-4 py-2">
-            <Image className="rounded-lg h-[60px] w-[60px]" width={60} height={60} source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }} />
+        <View className="flex-row justify-between items-center ps-2 pe-4 py-2 my-2">
+            <FontAwesome className='ps-2' name="leaf" size={20} color="green" />
             <View className="flex-1 px-4">
                 <Text className="font-semibold pb-1 text-black">{item.name}</Text>
                 <Text className="text-md text-black">₹{item.price}</Text>
             </View>
             <View className="flex-row items-center space-x-2">
                 {itemInCart ? (
-                    <View className='flex flex-row border border-green-700 rounded-md items-center justify-center bg-green-700'>
+                    <View className='flex flex-row border border-green-700 rounded-md items-center justify-center bg-green-50'>
                         <TouchableOpacity
                             onPress={() => removeFromCart(item)}
-                            className="px-3 py-1 text-white rounded-lg"
+                            className="px-3 py-1 text-green-700 rounded-lg"
                         >
-                            <Text className="text-white font-bold">-</Text>
+                            <Text className="text-green-700 font-bold">-</Text>
                         </TouchableOpacity>
-                        <Text className="text-lg px-1 text-white">{itemInCart.quantity}</Text>
+                        <Text className="text-lg px-1 text-black">{itemInCart.quantity}</Text>
                         <TouchableOpacity
                             onPress={() => addToCart(item)}
-                            className="px-3 py-1 text-white rounded-lg"
+                            className="px-3 py-1 text-green-700 rounded-lg"
                         >
-                            <Text className="text-white font-bold">+</Text>
+                            <Text className="text-green-700 font-bold">+</Text>
                         </TouchableOpacity>
                     </View>
                 ) : (
@@ -53,5 +54,5 @@ const Product = ({ item }: { item: ProductItem }) => {
     )
 }
 
-export default Product
-export type { ProductItem }
+export default CartProduct
+export type { CartProductItem }

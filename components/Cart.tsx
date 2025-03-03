@@ -11,32 +11,32 @@ const Cart = () => {
 
     const totalPrice = cart.reduce((acc: number, item: { price: number; quantity: number }) => acc + item.price * item.quantity, 0)
 
-    if (cart && cart?.length == 0) return <SafeAreaView className="relative flex-1 -mb-12"></SafeAreaView>;
+    if (cart && cart?.length == 0) return <SafeAreaView className="flex-1 -mb-12"></SafeAreaView>;
 
     return (
         <SafeAreaView className="relative flex-1 mb-4 mx-2">
-            <View className="absolute bottom-0 left-0 right-0 px-4 py-2 rounded-xl bg-white" style={{boxShadow: '0px 0px 15px #0a0a0a2e'}}>
+            <View className="absolute bottom-0 left-0 right-0 px-2 py-2 rounded-xl bg-white" style={{ boxShadow: '0px 0px 15px #0a0a0a2e' }}>
                 <View className="flex-row justify-between">
-                    <View className="flex-row items-center gap-x-2">
-                        <Image className='w-[40px] h-[40px] rounded-full' source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }}/>
+                    <View className="flex-row items-center gap-x-2 justify-center">
+                        <Image width={40} height={40} className='rounded-full' source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }} />
                         <View>
                             <Text className="text-[16px] font-semibold">Canteen Order</Text>
-                            <Text className="text-sm text-zinc-700">Total: ₹{totalPrice}</Text>
+                            <Text className="text-xs text-zinc-700">Total: ₹{totalPrice}</Text>
                         </View>
                     </View>
                     <View className="flex-row items-center gap-x-2">
-                        <TouchableOpacity className="bg-green-700 px-2 py-1 rounded-lg" onPress={() => router.push('/cart')}>
+                        <TouchableOpacity className="bg-green-700 px-4 py-1 rounded-lg" onPress={() => router.push('/cart')}>
                             <Text className="text-white font-semibold">View Cart</Text>
                             <Text className="text-zinc-100 text-xs text-center">{cart.length} items</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity className="bg-gray-50 p-2 rounded-full" onPress={clearCart}>
+                        <TouchableOpacity className="bg-gray-100 p-2 rounded-full" onPress={clearCart}>
                             <FontAwesome name="times" color='gray' />
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
         </SafeAreaView>
-    ) 
+    )
 }
 
 export default Cart
