@@ -11,7 +11,7 @@ const Cart = () => {
 
     const totalPrice = cart.reduce((acc: number, item: { price: number; quantity: number }) => acc + item.price * item.quantity, 0)
 
-    if (cart && cart?.length == 0) return null;
+    if (cart && cart?.length == 0) return <SafeAreaView className="relative flex-1 -mb-12"></SafeAreaView>;
 
     return (
         <SafeAreaView className="relative flex-1 mb-4 mx-2">
