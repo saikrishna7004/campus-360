@@ -1,39 +1,39 @@
-import React, { useState } from 'react'
-import { Text, RefreshControl, ScrollView, View } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { Text, RefreshControl, ScrollView, View, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CartSummary from '@/components/Cart'
 import CategorySection from '@/components/CategorySection'
 import { ProductItem } from '@/components/Product'
 import { StatusBar } from 'expo-status-bar'
 import { FontAwesome } from '@expo/vector-icons'
+import axios from 'axios'
 
 const Stationery: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
         Stationery: true
     })
+    const [menuItems, setMenuItems] = useState<ProductItem[]>([])
 
-    const menuItems: ProductItem[] = [
-        { "id": 111, "name": "Ballpoint Pen", "price": 15, "category": "Stationery" },
-        { "id": 112, "name": "Notebook", "price": 50, "category": "Stationery" },
-        { "id": 113, "name": "Pencil", "price": 10, "category": "Stationery" },
-        { "id": 114, "name": "Eraser", "price": 5, "category": "Stationery" },
-        { "id": 115, "name": "Highlighter", "price": 20, "category": "Stationery" },
-        { "id": 116, "name": "Marker", "price": 30, "category": "Stationery" },
-        { "id": 117, "name": "Ruler", "price": 25, "category": "Stationery" },
-        { "id": 118, "name": "Stapler", "price": 60, "category": "Stationery" },
-        { "id": 119, "name": "Paper Clips", "price": 10, "category": "Stationery" },
-        { "id": 1110, "name": "Glue Stick", "price": 20, "category": "Stationery" },
-        { "id": 121, "name": "Scissors", "price": 50, "category": "Stationery" },
-        { "id": 122, "name": "Post-it Notes", "price": 35, "category": "Stationery" },
-        { "id": 123, "name": "Folder", "price": 40, "category": "Stationery" },
-        { "id": 124, "name": "Sticky Notes", "price": 15, "category": "Stationery" },
-        { "id": 125, "name": "Tape", "price": 20, "category": "Stationery" }
-    ]
+    useEffect(() => {
+        fetchMenuItems()
+    }, [])
+
+    const fetchMenuItems = async () => {
+        try {
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/product/stationery`)
+            setMenuItems(response.data)
+        } catch (error) {
+            console.error('Error fetching menu items:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const onRefresh = () => {
         setRefreshing(true)
-        setRefreshing(false)
+        fetchMenuItems().finally(() => setRefreshing(false))
     }
 
     const toggleCategory = (category: string) => {
@@ -72,15 +72,19 @@ const Stationery: React.FC = () => {
                 </View>
                 <StatusBar style="inverted" />
 
-                {categories.map((category) => (
-                    <CategorySection
-                        key={category}
-                        category={category}
-                        expanded={expandedCategories[category]}
-                        toggleCategory={toggleCategory}
-                        products={getCategoryProducts(category)}
-                    />
-                ))}
+                {loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    categories.map((category) => (
+                        <CategorySection
+                            key={category}
+                            category={category}
+                            expanded={expandedCategories[category]}
+                            toggleCategory={toggleCategory}
+                            products={getCategoryProducts(category)}
+                        />
+                    ))
+                )}
             </ScrollView>
             <CartSummary />
         </SafeAreaView>

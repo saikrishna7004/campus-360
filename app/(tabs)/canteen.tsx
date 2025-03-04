@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Text, RefreshControl, ScrollView, View } from 'react-native'
+import { Text, RefreshControl, ScrollView, View, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CartSummary from '@/components/Cart'
 import CategorySection from '@/components/CategorySection'
@@ -10,6 +10,7 @@ import axios from 'axios'
 
 const Canteen: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
         Snacks: true,
         Drinks: true,
@@ -23,10 +24,12 @@ const Canteen: React.FC = () => {
 
     const fetchMenuItems = async () => {
         try {
-            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/canteen`)
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/product/canteen`)
             setMenuItems(response.data)
         } catch (error) {
             console.error('Error fetching menu items:', error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -71,15 +74,19 @@ const Canteen: React.FC = () => {
                 </View>
                 <StatusBar style="inverted" />
 
-                {categories.map((category) => (
-                    <CategorySection
-                        key={category}
-                        category={category}
-                        expanded={expandedCategories[category]}
-                        toggleCategory={toggleCategory}
-                        products={getCategoryProducts(category)}
-                    />
-                ))}
+                {loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    categories.map((category) => (
+                        <CategorySection
+                            key={category}
+                            category={category}
+                            expanded={expandedCategories[category]}
+                            toggleCategory={toggleCategory}
+                            products={getCategoryProducts(category)}
+                        />
+                    ))
+                )}
             </ScrollView>
             <CartSummary />
         </SafeAreaView>
