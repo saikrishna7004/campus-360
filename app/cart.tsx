@@ -50,7 +50,7 @@ const Cart = () => {
                 <View className="flex mx-3 bg-white rounded-2xl">
                     {cart.map((item) => {
                         return (
-                            <CartProduct key={item.id} item={item} />
+                            <CartProduct key={item._id} item={item} />
                         )
                     })}
                 </View>

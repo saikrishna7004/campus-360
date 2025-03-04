@@ -2,7 +2,7 @@ import useCartStore from '@/store/cartStore'
 import { View, Image, Text, TouchableOpacity } from 'react-native'
 
 interface ProductItem {
-    id: number
+    _id: number
     name: string
     price: number
     category: string
@@ -10,7 +10,7 @@ interface ProductItem {
 
 const Product = ({ item }: { item: ProductItem }) => {
     const { cart, addToCart, removeFromCart } = useCartStore()
-    const itemInCart = cart.find((cartItem) => cartItem.id === item.id)
+    const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
 
     return (
         <View className="flex-row justify-between items-center px-4 py-2">

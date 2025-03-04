@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 interface Product {
-    id: number
+    _id: number
     name: string
     price: number
 }
@@ -20,7 +20,7 @@ interface CartStore {
 const useCartStore = create<CartStore>((set) => ({
     cart: [],
     addToCart: (product) => set((state) => {
-        const itemIndex = state.cart.findIndex((item) => item.id === product.id)
+        const itemIndex = state.cart.findIndex((item) => item._id === product._id)
         if (itemIndex >= 0) {
             const updatedCart = [...state.cart]
             updatedCart[itemIndex].quantity += 1
@@ -30,7 +30,7 @@ const useCartStore = create<CartStore>((set) => ({
         }
     }),
     removeFromCart: (product) => set((state) => {
-        const itemIndex = state.cart.findIndex((item) => item.id === product.id)
+        const itemIndex = state.cart.findIndex((item) => item._id === product._id)
         if (itemIndex >= 0) {
             const updatedCart = [...state.cart]
             updatedCart[itemIndex].quantity -= 1

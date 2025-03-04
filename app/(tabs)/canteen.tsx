@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Text, RefreshControl, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CartSummary from '@/components/Cart'
@@ -6,44 +6,33 @@ import CategorySection from '@/components/CategorySection'
 import { ProductItem } from '@/components/Product'
 import { StatusBar } from 'expo-status-bar'
 import { FontAwesome } from '@expo/vector-icons'
+import axios from 'axios'
 
 const Canteen: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false)
     const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
         Snacks: true,
         Drinks: true,
-        Desserts: true,
         Meals: true,
     })
+    const [menuItems, setMenuItems] = useState<ProductItem[]>([])
 
-    const menuItems: ProductItem[] = [
-        { id: 1, name: 'Hyderabadi Biryani', price: 150, category: 'Snacks' },
-        { id: 2, name: 'Fried Rice', price: 120, category: 'Snacks' },
-        { id: 3, name: 'Mixed Fried Rice', price: 130, category: 'Snacks' },
-        { id: 4, name: 'Paneer Fried Rice', price: 140, category: 'Snacks' },
-        { id: 5, name: 'Noodles', price: 100, category: 'Snacks' },
-        { id: 6, name: 'Vegetable Shezwan Noodles', price: 130, category: 'Snacks' },
-        { id: 7, name: 'Chicken Noodles', price: 150, category: 'Snacks' },
-        { id: 8, name: 'Vegetable Manchurian', price: 120, category: 'Snacks' },
-        { id: 9, name: 'Paneer Tikka', price: 160, category: 'Snacks' },
-        { id: 10, name: 'Lemon Soda', price: 50, category: 'Drinks' },
-        { id: 11, name: 'Mango Lassi', price: 70, category: 'Drinks' },
-        { id: 12, name: 'Sweet Lime Juice', price: 40, category: 'Drinks' },
-        { id: 13, name: 'Gulab Jamun', price: 40, category: 'Desserts' },
-        { id: 14, name: 'Jalebi', price: 50, category: 'Desserts' },
-        { id: 15, name: 'Kulfi', price: 80, category: 'Desserts' },
-        { id: 16, name: 'Hyderabadi Mutton Biryani', price: 200, category: 'Meals' },
-        { id: 17, name: 'Chicken Biryani', price: 180, category: 'Meals' },
-        { id: 18, name: 'Paneer Butter Masala with Roti', price: 130, category: 'Meals' },
-        { id: 19, name: 'Dal Tadka with Rice', price: 90, category: 'Meals' },
-        { id: 20, name: 'Dairy Milk Chocolate', price: 50, category: 'Snacks' },
-        { id: 21, name: 'Perk', price: 20, category: 'Snacks' },
-        { id: 22, name: 'KitKat', price: 30, category: 'Snacks' },
-    ]
+    useEffect(() => {
+        fetchMenuItems()
+    }, [])
+
+    const fetchMenuItems = async () => {
+        try {
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/canteen`)
+            setMenuItems(response.data)
+        } catch (error) {
+            console.error('Error fetching menu items:', error)
+        }
+    }
 
     const onRefresh = () => {
         setRefreshing(true)
-        setRefreshing(false)
+        fetchMenuItems().finally(() => setRefreshing(false))
     }
 
     const toggleCategory = (category: string) => {
@@ -57,7 +46,7 @@ const Canteen: React.FC = () => {
         return menuItems.filter((item) => item.category === category)
     }
 
-    const categories = ['Snacks', 'Drinks', 'Desserts', 'Meals']
+    const categories = ['Snacks', 'Drinks', 'Meals']
 
     return (
         <SafeAreaView className="flex-1 bg-white">

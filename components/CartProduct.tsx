@@ -3,7 +3,7 @@ import { FontAwesome } from '@expo/vector-icons'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 interface CartProductItem {
-    id: number
+    _id: number
     name: string
     price: number
     category?: string
@@ -11,7 +11,7 @@ interface CartProductItem {
 
 const CartProduct = ({ item }: { item: CartProductItem }) => {
     const { cart, addToCart, removeFromCart } = useCartStore()
-    const itemInCart = cart.find((cartItem) => cartItem.id === item.id)
+    const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
 
     return (
         <View className="flex-row justify-between items-center ps-2 pe-4 py-2 my-2">
