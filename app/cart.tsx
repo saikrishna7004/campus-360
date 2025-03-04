@@ -26,7 +26,7 @@ const Cart = () => {
     }
 
     useEffect(() => {
-        if(cart.length === 0) {
+        if (cart.length === 0) {
             router.back()
         }
     }, [cart])
@@ -47,12 +47,44 @@ const Cart = () => {
                 }
                 contentContainerStyle={{ paddingBottom: 340 }}
             >
-                <View className="flex mx-3 bg-white rounded-2xl">
+                <View className="flex mx-3 mb-4 bg-white rounded-2xl">
                     {cart.map((item) => {
                         return (
                             <CartProduct key={item.id} item={item} />
                         )
                     })}
+                </View>
+                <View className="flex flex-row mx-3 mb-4 bg-white rounded-2xl p-4">
+                    <View className="flex flex-row justify-between items-center mb-4">
+                        <FontAwesome name='clock-o' size={24} color='green' />
+                    </View>
+                    <View>
+                        <View className="flex flex-row items-center px-4">
+                            <Text className="text-gray-800 me-1">Delivery in</Text>
+                            <Text className="font-bold text-gray-800">10 min</Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center px-4 mt-1">
+                            <Text className="font-medium text-gray-800">Schedule for later</Text>
+                        </View>
+                    </View>
+                </View>
+                <View className="flex mx-3 bg-white rounded-2xl py-4">
+                    <View className="flex flex-row justify-between items-center px-4 mb-4">
+                        <Text className="text-gray-800">Subtotal</Text>
+                        <Text className="font-medium text-gray-800">₹{totalPrice}.00</Text>
+                    </View>
+                    <View className="flex flex-row justify-between items-center px-4">
+                        <Text className="text-gray-800">Platform Fee</Text>
+                        <Text className="font-medium text-gray-800">₹2.00</Text>
+                    </View>
+                    <View className="flex flex-row justify-between items-center px-4 mt-4">
+                        <View className="border-t border-gray-200 w-[50%]"></View>
+                        <View className="border-t border-gray-200 w-[50%]"></View>
+                    </View>
+                    <View className="flex flex-row justify-between items-center px-4 mt-4">
+                        <Text className="text-gray-800">Total</Text>
+                        <Text className="font-medium text-gray-800">₹{totalPrice + 2}.00</Text>
+                    </View>
                 </View>
                 <View className='p-4 gap-1'>
                     <Text className="tracking-[2px] font-medium text-slate-500">CANCELLATION POLICY</Text>
