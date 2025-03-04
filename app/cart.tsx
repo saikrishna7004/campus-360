@@ -50,7 +50,7 @@ const Cart = () => {
                 <View className="flex mx-3 mb-4 bg-white rounded-2xl">
                     {cart.map((item) => {
                         return (
-                            <CartProduct key={item.id} item={item} />
+                            <CartProduct key={item._id} item={item} />
                         )
                     })}
                 </View>
@@ -108,7 +108,7 @@ const Cart = () => {
                         className="w-[60%] py-3 bg-green-800 rounded-lg px-4 flex flex-row justify-between items-center"
                     >
                         <View className="flex fl0x-col">
-                            <Text className="font-medium text-white">₹{totalPrice}.00</Text>
+                            <Text className="font-medium text-white">₹{totalPrice + 2}.00</Text>
                             <Text className="text-xs text-gray-200">TOTAL</Text>
                         </View>
                         <View className="flex flex-row gap-2">

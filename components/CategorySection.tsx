@@ -28,7 +28,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, t
                 <View>
                     {products.map((item) => {
                         return (
-                            <Product key={item.id} item={item} />
+                            <Product key={item._id} item={item} />
                         )
                     })}
                 </View>
