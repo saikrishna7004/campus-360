@@ -3,19 +3,13 @@ import { View, Text, TouchableOpacity, Alert, TextInput, ScrollView, SafeAreaVie
 
 const Office = () => {
   const [tasks, setTasks] = useState([
-    { id: 1, title: 'Task 1', description: 'Complete office setup' },
-    { id: 2, title: 'Task 2', description: 'Attend meeting' },
-    { id: 3, title: 'Task 3', description: 'Prepare presentation' },
-    { id: 4, title: 'Task 4', description: 'Review documents' },
-    { id: 5, title: 'Task 5', description: 'Organize workspace' },
+    { id: 1, title: 'Bonafide', description: 'Get bonafide for reasons' },
+    { id: 2, title: 'Leave Application', description: 'Apply for leave' },
   ]);
 
   const [previousRequests, setPreviousRequests] = useState([
-    { id: 1, title: 'Previous Task 1', description: 'Finalize reports' },
-    { id: 2, title: 'Previous Task 2', description: 'Update database' },
-    { id: 3, title: 'Previous Task 3', description: 'Review code' },
-    { id: 4, title: 'Previous Task 4', description: 'Team meeting' },
-    { id: 5, title: 'Previous Task 5', description: 'Organize event' },
+    { id: 1, title: 'Bonafide', description: 'Get bonafide for reasons' },
+    { id: 2, title: 'Leave Application', description: 'Apply for leave' },
   ]);
 
   const [isExpanded, setIsExpanded] = useState(false);
