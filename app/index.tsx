@@ -31,6 +31,11 @@ const Home = () => {
                     <MaterialCommunityIcons name="briefcase" size={40} color="white" />
                     <Text className="text-white text-lg mt-4">Office</Text>
                 </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push('/admin/menu')} style={styles.card} className="bg-red-600 p-6 rounded-xl shadow-lg flex justify-center items-center">
+                    <MaterialCommunityIcons name="chef-hat" size={40} color="white" />
+                    <Text className="text-white text-lg mt-4">Vendor</Text>
+                </TouchableOpacity>
             </View>
         </View>
     )

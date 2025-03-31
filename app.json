@@ -47,6 +47,12 @@
             "@/fonts/metropolis/Metropolis-Black.otf"
           ]
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo.png"
+        }
       ]
     ],
     "experiments": {
