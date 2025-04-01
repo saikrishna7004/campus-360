@@ -3,15 +3,32 @@ import { FontAwesome } from '@expo/vector-icons'
 import { View, Text, TouchableOpacity } from 'react-native'
 
 interface CartProductItem {
-    _id: number
+    _id: string
     name: string
     price: number
     category?: string
+    vendor: string
 }
 
 const CartProduct = ({ item }: { item: CartProductItem }) => {
-    const { cart, addToCart, removeFromCart } = useCartStore()
+    const { getCartByVendor, addToCart, decreaseQuantity } = useCartStore()
+    
+    const vendor: 'canteen' | 'stationery' | 'default' = (item.vendor as 'canteen' | 'stationery' | 'default') || 'default'
+    const cart = getCartByVendor(vendor)
     const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
+
+    const handleAddToCart = () => {
+        addToCart({
+            _id: item._id,
+            name: item.name,
+            price: item.price,
+            vendor
+        })
+    }
+
+    if (!itemInCart) {
+        return null;
+    }
 
     return (
         <View className="flex-row justify-between items-center ps-2 pe-4 py-2 my-2">
@@ -21,34 +38,21 @@ const CartProduct = ({ item }: { item: CartProductItem }) => {
                 <Text className="text-md text-black">₹{item.price}</Text>
             </View>
             <View className="flex-row items-center space-x-2">
-                {itemInCart ? (
-                    <View className='flex flex-row border border-green-700 rounded-md items-center justify-center bg-green-50'>
-                        <TouchableOpacity
-                            onPress={() => removeFromCart(item)}
-                            className="px-3 py-1 text-green-700 rounded-lg"
-                        >
-                            <Text className="text-green-700 font-bold">-</Text>
-                        </TouchableOpacity>
-                        <Text className="text-lg px-1 text-black">{itemInCart.quantity}</Text>
-                        <TouchableOpacity
-                            onPress={() => addToCart(item)}
-                            className="px-3 py-1 text-green-700 rounded-lg"
-                        >
-                            <Text className="text-green-700 font-bold">+</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
+                <View className='flex flex-row border border-green-700 rounded-md items-center justify-center bg-green-50'>
                     <TouchableOpacity
-                        onPress={() => addToCart(item)}
-                        className='flex flex-row pe-3 ps-4 py-1 border border-green-700 rounded-md items-center justify-center bg-green-50'
+                        onPress={() => decreaseQuantity(item._id, vendor)}
+                        className="px-3 py-1 text-green-700 rounded-lg"
                     >
-                        <View className='text-green-700 gap-2 flex flex-row justify-center items-center'>
-                            <Text className='text-green-700 text-xs font-semibold ps-1 leading-5'>ADD</Text>
-                            <Text className='text-green-700 text-lg ps-1 leading-5'>+</Text>
-                        </View>
+                        <Text className="text-green-700 font-bold">-</Text>
                     </TouchableOpacity>
-
-                )}
+                    <Text className="text-lg px-1 text-black">{itemInCart.quantity}</Text>
+                    <TouchableOpacity
+                        onPress={handleAddToCart}
+                        className="px-3 py-1 text-green-700 rounded-lg"
+                    >
+                        <Text className="text-green-700 font-bold">+</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     )

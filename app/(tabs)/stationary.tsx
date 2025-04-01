@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar'
 import { FontAwesome } from '@expo/vector-icons'
 import axios from 'axios'
 
+const VENDOR_TYPE = 'stationery';
+
 const Stationery: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -81,7 +83,11 @@ const Stationery: React.FC = () => {
                             category={category}
                             expanded={expandedCategories[category]}
                             toggleCategory={toggleCategory}
-                            products={getCategoryProducts(category)}
+                            products={getCategoryProducts(category).map(item => ({
+                                ...item,
+                                vendor: VENDOR_TYPE
+                            }))}
+                            vendor={VENDOR_TYPE}
                         />
                     ))
                 )}

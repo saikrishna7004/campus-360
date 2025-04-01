@@ -1,4 +1,3 @@
-// import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
@@ -6,16 +5,14 @@ import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
-// import { useColorScheme } from '@/hooks/useColorScheme'
 import "@/global.css"
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-    // const colorScheme = useColorScheme()
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     })
@@ -31,19 +28,25 @@ export default function RootLayout() {
     }
 
     return (
-        // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-                <ThemeProvider value={DefaultTheme}>
-                    <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                        <Stack.Screen name="cart" options={{ headerShown: true }} />
-                        <Stack.Screen name="not-found" />
-                    </Stack>
-                    <StatusBar style="inverted" />
-                </ThemeProvider>
-            </BottomSheetModalProvider>
-        </GestureHandlerRootView >
+        <SafeAreaProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <BottomSheetModalProvider>
+                    <ThemeProvider value={DefaultTheme}>
+                        <Stack screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="index" options={{ headerShown: false, title: 'Home' }} />
+                            <Stack.Screen name="login" options={{ headerShown: false }} />
+                            <Stack.Screen name="register" options={{ headerShown: false }} />
+                            <Stack.Screen name="profile" options={{ headerTitle: "Profile", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen name="cart" options={{ headerShown: true }} />
+                            <Stack.Screen name="not-found" />
+                            <Stack.Screen name="admin" options={{ headerTitle: "Admin Panel", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
+                            <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
+                        </Stack>
+                        <StatusBar style="dark" />
+                    </ThemeProvider>
+                </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+        </SafeAreaProvider>
     )
 }

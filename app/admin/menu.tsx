@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Switch, ScrollView, RefreshControl, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, RefreshControl, ActivityIndicator, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import axios from 'axios'
 import AdminCategorySection, { MenuItem } from '@/components/AdminCategorySection'
+import useAuthStore from '@/store/authStore'
 
 const Menu = () => {
     const [refreshing, setRefreshing] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
-    const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
-        Food: true,
-        Snacks: true,
-        Drinks: true,
-        Meals: true,
-    })
+    const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({})
     const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+    const { getAuthHeader } = useAuthStore()
 
     useEffect(() => {
         fetchMenuItems()
@@ -22,10 +19,20 @@ const Menu = () => {
 
     const fetchMenuItems = async (): Promise<void> => {
         try {
-            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/product/canteen`)
+            const response = await axios.get<MenuItem[]>(`${process.env.EXPO_PUBLIC_API_URL}/product/canteen`, {
+                headers: getAuthHeader()
+            })
             setMenuItems(response.data)
+            
+            const uniqueCategories = Array.from(new Set(response.data.map((item: MenuItem) => item.category)))
+            const initialExpandedState: { [key: string]: boolean } = uniqueCategories.reduce((acc: { [key: string]: boolean }, category: string): { [key: string]: boolean } => {
+                acc[category] = true
+                return acc
+            }, {})
+            
+            setExpandedCategories(initialExpandedState)
         } catch (error) {
-            console.error('Error fetching menu items:', error)
+            Alert.alert('Error', 'Failed to fetch menu items. Pull down to refresh.')
         } finally {
             setLoading(false)
         }
@@ -43,12 +50,30 @@ const Menu = () => {
         }))
     }
 
-    const toggleInStock = (id: string): void => {
-        setMenuItems((prevItems) =>
-            prevItems.map((item) =>
-                item._id === id ? { ...item, inStock: !item.inStock } : item
+    const toggleInStock = async (id: string): Promise<void> => {
+        try {
+            const item = menuItems.find(item => item._id === id)
+            if (!item) return
+            
+            setMenuItems((prevItems) =>
+                prevItems.map((item) =>
+                    item._id === id ? { ...item, inStock: !item.inStock } : item
+                )
             )
-        )
+            
+            await axios.patch(`${process.env.EXPO_PUBLIC_API_URL}/product/${id}`, { 
+                inStock: !item.inStock 
+            }, {
+                headers: getAuthHeader()
+            })
+        } catch (error) {
+            Alert.alert('Error', 'Failed to update item status')
+            setMenuItems((prevItems) =>
+                prevItems.map((item) =>
+                    item._id === id ? { ...item, inStock: !item.inStock } : item
+                )
+            )
+        }
     }
 
     const getCategoryProducts = (category: string): MenuItem[] => {

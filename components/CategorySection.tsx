@@ -9,9 +9,10 @@ interface CategorySectionProps {
     expanded: boolean
     toggleCategory: (category: string) => void
     products: ProductItem[]
+    vendor?: "canteen" | "stationery" | "default"
 }
 
-const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, toggleCategory, products }) => {
+const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, toggleCategory, products, vendor }) => {
     return (
         <SafeAreaView className="flex-1">
             <TouchableOpacity onPress={() => toggleCategory(category)} className="p-4 flex-row justify-between items-center">
@@ -24,11 +25,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({ category, expanded, t
             </TouchableOpacity>
             {expanded && (
                 <View>
-                    {products.map((item) => {
-                        return (
-                            <Product key={item._id} item={item} />
-                        )
-                    })}
+                    {products.map((item) => (
+                        <Product 
+                            key={item._id} 
+                            item={item} 
+                            vendor={vendor} 
+                        />
+                    ))}
                 </View>
             )}
         </SafeAreaView>
