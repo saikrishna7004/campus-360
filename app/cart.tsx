@@ -77,7 +77,7 @@ const Cart = () => {
         try {
             if (!isAuthenticated) {
                 Alert.alert('Error', 'You need to be logged in to place an order')
-                router.push('/login')
+                router.replace('/login')
                 return
             }
 
@@ -102,7 +102,7 @@ const Cart = () => {
             const totalAmountStr = (totalPrice + 2).toString();
             const itemsStr = JSON.stringify(cartItems);
 
-            router.push({
+            router.replace({
                 pathname: '/order-confirmation',
                 params: {
                     orderId,

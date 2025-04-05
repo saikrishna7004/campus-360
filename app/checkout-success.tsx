@@ -43,14 +43,14 @@ const CheckoutSuccess = () => {
                     <View className="w-full space-y-3">
                         <TouchableOpacity 
                             className="bg-green-700 py-3 rounded-lg items-center"
-                            onPress={() => router.push('/my-orders')}
+                            onPress={() => router.replace('/my-orders')}
                         >
                             <Text className="text-white font-bold">View My Orders</Text>
                         </TouchableOpacity>
                         
                         <TouchableOpacity 
                             className="bg-white border border-green-700 py-3 rounded-lg items-center"
-                            onPress={() => router.push('/')}
+                            onPress={() => router.replace('/')}
                         >
                             <Text className="text-green-700 font-bold">Continue Shopping</Text>
                         </TouchableOpacity>

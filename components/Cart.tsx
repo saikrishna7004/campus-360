@@ -5,6 +5,7 @@ import useCartStore, { VendorType } from '@/store/cartStore'
 import useAuthStore from '@/store/authStore'
 import { FontAwesome } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
+import { cn } from '@/lib/cn'
 
 const VENDOR_NAMES: Record<VendorType, string> = {
     'canteen': 'Canteen',
@@ -50,14 +51,14 @@ const Cart = () => {
         total + cart.items.reduce((sum, item) => sum + item.quantity, 0), 0);
     
     const totalPrice = carts.reduce((total, cart) => 
-        total + cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0), 0);
+        total + cart.items.reduce((sum, item) => sum + parseFloat((item.price * item.quantity).toFixed(2)), 0), 0);
 
     return (
         <SafeAreaView className="relative flex-1 mb-4 mx-2">
             <View className="absolute bottom-0 left-0 right-0 px-2 py-2 rounded-xl bg-white" style={{ boxShadow: '0px 0px 15px #0a0a0a2e' }}>
                 {carts.map((cart) => {
                     const vendorTotalPrice = cart.items.reduce(
-                        (acc, item) => acc + item.price * item.quantity, 0
+                        (acc, item) => acc + parseFloat((item.price * item.quantity).toFixed(2)), 0
                     );
                     const vendorItemCount = cart.items.reduce(
                         (acc, item) => acc + item.quantity, 0
@@ -66,14 +67,16 @@ const Cart = () => {
                     const displayName = VENDOR_NAMES[cart.vendor];
                     
                     return (
-                        <View key={cart.vendor} className="flex-row justify-between mb-2">
+                        <View key={cart.vendor} className={cn("flex-row justify-between", {
+                            "mb-2": cart.vendor !== carts[carts.length - 1].vendor,
+                        })}>
                             <View className="flex-row items-center gap-x-2 justify-center">
                                 <Image width={40} height={40} className='rounded-full' source={{ uri: 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg' }} />
                                 <View>
                                     <Text className="text-[16px] font-semibold">
                                         {displayName} Order
                                     </Text>
-                                    <Text className="text-xs text-zinc-700">Total: ₹{vendorTotalPrice}</Text>
+                                    <Text className="text-xs text-zinc-700">Total: ₹{vendorTotalPrice.toFixed(2)}</Text>
                                 </View>
                             </View>
                             <View className="flex-row items-center gap-x-2">
@@ -107,10 +110,10 @@ const Cart = () => {
                         </View>
                         <TouchableOpacity 
                             className="bg-green-700 px-4 py-2 rounded-lg"
-                            onPress={() => router.push('/checkout')}
+                            onPress={() => router.replace('/checkout')}
                         >
                             <Text className="text-white font-semibold">Checkout All</Text>
-                            <Text className="text-zinc-100 text-xs text-center">₹{totalPrice} • {totalItems} items</Text>
+                            <Text className="text-zinc-100 text-xs text-center">₹{totalPrice.toFixed(2)} • {totalItems} items</Text>
                         </TouchableOpacity>
                     </View>
                 )}

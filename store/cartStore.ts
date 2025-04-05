@@ -51,8 +51,9 @@ const useCartStore = create<CartStore>((set, get) => ({
                 
                 if (existingItemIndex >= 0) {
                     existingCart.items[existingItemIndex].quantity += 1;
+                    existingCart.items[existingItemIndex].price = parseFloat(existingCart.items[existingItemIndex].price.toFixed(2));
                 } else {
-                    existingCart.items.push({ ...item, quantity: 1 });
+                    existingCart.items.push({ ...item, quantity: 1, price: parseFloat(item.price.toFixed(2)) });
                 }
                 
                 return { carts: updatedCarts };
@@ -63,7 +64,7 @@ const useCartStore = create<CartStore>((set, get) => ({
                     ...state.carts,
                     {
                         vendor,
-                        items: [{ ...item, quantity: 1 }]
+                        items: [{ ...item, quantity: 1, price: parseFloat(item.price.toFixed(2)) }]
                     }
                 ]
             };
@@ -159,7 +160,7 @@ const useCartStore = create<CartStore>((set, get) => ({
     getVendorCarts: () => get().carts,
     
     getTotalItems: () => get().carts.reduce((total, cart) => 
-        total + cart.items.reduce((sum, item) => sum + item.quantity, 0), 0)
+        total + cart.items.reduce((sum, item) => sum + parseFloat((item.quantity * item.price).toFixed(2)), 0), 0)
 }));
 
 export default useCartStore;

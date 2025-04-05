@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 
-export type UserRole = 'student' | 'admin' | 'canteen';
+export type UserRole = 'student' | 'admin' | 'vendor';
 export type VendorType = 'food' | 'stationery' | 'other';
 
 export interface User {
@@ -25,6 +25,7 @@ interface AuthState {
     register: (name: string, email: string, password: string) => Promise<boolean>;
     logout: () => void;
     getAuthHeader: () => { Authorization: string } | {};
+    loadUser: (authHeader: Record<string, string>) => Promise<void>;
 }
 
 const zustandStorage = {
@@ -121,6 +122,27 @@ const useAuthStore = create<AuthState>()(
             getAuthHeader: () => {
                 const { token } = get();
                 return token ? { Authorization: `Bearer ${token}` } : {};
+            },
+
+            loadUser: async (authHeader) => {
+                set({ isLoading: true, error: null });
+                try {
+                    const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/user`, {
+                        headers: authHeader,
+                    });
+                    set({
+                        user: response.data,
+                        isAuthenticated: true,
+                        isLoading: false,
+                    });
+                } catch (error) {
+                    set({
+                        user: null,
+                        isAuthenticated: false,
+                        isLoading: false,
+                        error: 'Failed to load user',
+                    });
+                }
             }
         }),
         {

@@ -7,14 +7,14 @@ export function useRoleProtection(allowedRoles: UserRole[]) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const { user, token, isAuthenticated, loadUser } = useAuthStore();
+  const { user, token, isAuthenticated, loadUser, getAuthHeader } = useAuthStore();
 
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
 
       if (!isAuthenticated) {
-        await loadUser();
+        await loadUser(getAuthHeader());
       }
 
       if (!user || !token) {
@@ -31,7 +31,7 @@ export function useRoleProtection(allowedRoles: UserRole[]) {
             router.replace('/');
             break;
           case 'vendor':
-            router.replace('/vendor/index');
+            router.replace('/vendor/inventory');
             break;
           case 'admin':
             router.replace('/admin/orders');

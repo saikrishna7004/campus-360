@@ -43,7 +43,7 @@ const Orders = () => {
     const filteredOrders = useMemo(() => orders.filter(order => order.status === activeTab), [orders, activeTab])
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white -mt-2" edges={['top', 'left', 'right']}>
             <StatusBar style="inverted" />
             <View className="flex-row gap-4 px-4">
                 {['preparing', 'ready'].map(tab => (
@@ -52,7 +52,7 @@ const Orders = () => {
                         onPress={() => setActiveTab(tab as 'preparing' | 'ready')} 
                         className={`rounded-xl border py-2 px-4 ${activeTab === tab ? 'border-green-800 bg-green-50' : 'border-gray-200'}`}
                     >
-                        <Text className={`text-lg ${activeTab === tab ? 'font-bold text-green-800' : ''}`}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+                        <Text className={`${activeTab === tab ? 'font-bold text-green-800' : ''}`}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
                     </TouchableOpacity>
                 ))}
             </View>

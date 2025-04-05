@@ -40,7 +40,7 @@ const CheckoutPage = () => {
     const handleMultipleCheckout = async () => {
         if (!isAuthenticated) {
             Alert.alert('Error', 'You need to be logged in to place orders');
-            return router.push('/login');
+            return router.replace('/login');
         }
 
         setIsProcessing(true);
