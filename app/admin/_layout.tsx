@@ -101,9 +101,10 @@ const AdminLayout = () => {
                     ),
                     tabBarStyle: {
                         backgroundColor: '#fff',
-                        borderTopWidth: 0,
                         elevation: 0,
                         height: 60,
+                        borderTopColor: '#ddd',
+                        borderTopWidth: 1,
                     },
                     tabBarActiveTintColor: '#4A9D5B',
                     tabBarInactiveTintColor: '#999',
