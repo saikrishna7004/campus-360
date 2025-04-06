@@ -13,20 +13,11 @@ interface CartProductItem {
 }
 
 const CartProduct = ({ item, rootClassName, iconClassName }: { item: CartProductItem, rootClassName?: string, iconClassName?: string }) => {
-    const { getCartByVendor, addToCart, decreaseQuantity } = useCartStore()
+    const { getCartByVendor, increaseQuantity, decreaseQuantity } = useCartStore()
 
     const vendor: 'canteen' | 'stationery' | 'default' = (item.vendor as 'canteen' | 'stationery' | 'default') || 'default'
     const cart = getCartByVendor(vendor)
     const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
-
-    const handleAddToCart = () => {
-        addToCart({
-            _id: item._id,
-            name: item.name,
-            price: item.price,
-            vendor
-        })
-    }
 
     if (!itemInCart) {
         return null;
@@ -56,7 +47,7 @@ const CartProduct = ({ item, rootClassName, iconClassName }: { item: CartProduct
                     </TouchableOpacity>
                     <Text className="px-1 text-black">{itemInCart.quantity}</Text>
                     <TouchableOpacity
-                        onPress={handleAddToCart}
+                        onPress={() => increaseQuantity(item._id, vendor)}
                         className="px-3 py-1 text-green-700 rounded-lg"
                     >
                         <Text className="text-green-700 font-bold">+</Text>

@@ -78,6 +78,18 @@ const CartSummary = () => {
         }
     }, [carts, isAuthenticated]);
 
+    interface ClearCartHandler {
+        (vendor: VendorType): Promise<void>;
+    }
+
+    const handleClearCart: ClearCartHandler = async (vendor) => {
+        try {
+            await clearCart(vendor);
+        } catch (error) {
+            console.error('Failed to clear cart:', error);
+        }
+    };
+
     if (!carts || carts.length === 0) return null;
 
     return (
@@ -159,7 +171,7 @@ const CartSummary = () => {
                                         <Text className="text-white font-semibold">View Cart</Text>
                                         <Text className="text-zinc-100 text-xs text-center">{vendorItemCount} items</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity className="bg-gray-100 p-2 rounded-full" onPress={() => clearCart(cart.vendor)}>
+                                    <TouchableOpacity className="bg-gray-100 p-2 rounded-full" onPress={() => handleClearCart(cart.vendor)}>
                                         <FontAwesome name="times" color="gray" />
                                     </TouchableOpacity>
                                 </View>

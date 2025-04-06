@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import useAuthStore from './authStore';
+import fetchWithHeader from '@/utils/fetchWithHeader';
 
 const VENDOR_TYPES = ['canteen', 'stationery', 'default'] as const;
 type VendorType = typeof VENDOR_TYPES[number];
@@ -35,13 +37,17 @@ interface CartStore {
     getTotalItems: () => number;
 }
 
-const syncCartWithCloud = async (get: any, set: any, authHeader: any) => {
+const syncCartWithCloud = async (get: any, set: any) => {
     try {
-        await axios.post(
-            `${process.env.EXPO_PUBLIC_API_URL}/cart/sync`,
-            { carts: get().carts },
-            { headers: authHeader }
-        );
+        const authHeader = useAuthStore.getState().getAuthHeader();
+        if (authHeader) {
+            await fetchWithHeader(`${process.env.EXPO_PUBLIC_API_URL}/cart/sync`, 'post', {
+                carts: get().carts || []
+            });
+            set({ loading: false });
+        } else {
+            set({ loading: false, error: 'No authentication header available' });
+        }
     } catch (error) {
         set({ error: 'Failed to sync cart to cloud' });
     }
@@ -51,17 +57,17 @@ const useCartStore = create<CartStore>((set, get) => ({
     carts: [],
     loading: false,
     error: null,
-    
+
     addToCart: (item) => {
         set((state) => {
             const vendor = item.vendor || 'default';
             const existingCartIndex = state.carts.findIndex(cart => cart.vendor === vendor);
-            
+
             if (existingCartIndex >= 0) {
                 const updatedCarts = [...state.carts];
                 const existingCart = updatedCarts[existingCartIndex];
                 const existingItemIndex = existingCart.items.findIndex(cartItem => cartItem._id === item._id);
-                
+
                 if (existingItemIndex >= 0) {
                     existingCart.items[existingItemIndex].quantity += 1;
                 } else {
@@ -71,10 +77,10 @@ const useCartStore = create<CartStore>((set, get) => ({
                         imageUrl: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
                     });
                 }
-                
+
                 return { carts: updatedCarts };
             }
-            
+
             return {
                 carts: [
                     ...state.carts,
@@ -90,31 +96,25 @@ const useCartStore = create<CartStore>((set, get) => ({
             };
         });
 
-        const authHeader = get().authHeader?.();
-        if (authHeader) {
-            syncCartWithCloud(get, set, authHeader);
-        }
+        syncCartWithCloud(get, set);
     },
-    
+
     removeFromCart: (id, vendor) => {
         set((state) => ({
-            carts: state.carts.map(cart => 
-                cart.vendor === vendor 
+            carts: state.carts.map(cart =>
+                cart.vendor === vendor
                     ? { ...cart, items: cart.items.filter(item => item._id !== id) }
                     : cart
             ).filter(cart => cart.items.length > 0)
         }));
 
-        const authHeader = get().authHeader?.();
-        if (authHeader) {
-            syncCartWithCloud(get, set, authHeader);
-        }
+        syncCartWithCloud(get, set);
     },
-    
+
     increaseQuantity: (id, vendor) => {
         set((state) => ({
-            carts: state.carts.map(cart => 
-                cart.vendor === vendor 
+            carts: state.carts.map(cart =>
+                cart.vendor === vendor
                     ? {
                         ...cart,
                         items: cart.items.map(item =>
@@ -127,16 +127,13 @@ const useCartStore = create<CartStore>((set, get) => ({
             )
         }));
 
-        const authHeader = get().authHeader?.();
-        if (authHeader) {
-            syncCartWithCloud(get, set, authHeader);
-        }
+        syncCartWithCloud(get, set);
     },
-    
+
     decreaseQuantity: (id, vendor) => {
         set((state) => ({
-            carts: state.carts.map(cart => 
-                cart.vendor === vendor 
+            carts: state.carts.map(cart =>
+                cart.vendor === vendor
                     ? {
                         ...cart,
                         items: cart.items.map(item =>
@@ -149,39 +146,31 @@ const useCartStore = create<CartStore>((set, get) => ({
             ).filter(cart => cart.items.length > 0)
         }));
 
-        const authHeader = get().authHeader?.();
-        if (authHeader) {
-            syncCartWithCloud(get, set, authHeader);
-        }
+        syncCartWithCloud(get, set);
     },
-    
+
     clearCart: (vendor) => {
         set((state) => ({
-            carts: vendor 
+            carts: vendor
                 ? state.carts.filter(cart => cart.vendor !== vendor)
                 : []
         }));
 
-        const authHeader = get().authHeader?.();
-        if (authHeader) {
-            syncCartWithCloud(get, set, authHeader);
-        }
+        syncCartWithCloud(get, set);
     },
-    
-    syncCartToCloud: async (authHeader) => {
+
+    syncCartToCloud: async () => {
         set({ loading: true, error: null });
         try {
-            await axios.post(
-                `${process.env.EXPO_PUBLIC_API_URL}/cart/sync`,
-                { carts: get().carts },
-                { headers: authHeader }
-            );
+            await fetchWithHeader(`${process.env.EXPO_PUBLIC_API_URL}/cart/sync`, 'post', {
+                carts: get().carts || []
+            });
             set({ loading: false });
         } catch (error) {
             set({ loading: false, error: 'Failed to sync cart to cloud' });
         }
     },
-    
+
     fetchCartFromCloud: async (authHeader) => {
         set({ loading: true, error: null });
         try {
@@ -205,12 +194,12 @@ const useCartStore = create<CartStore>((set, get) => ({
                     });
                     return acc;
                 }, {} as Record<VendorType, CartItem[]>);
-    
+
                 const normalizedCarts: VendorCart[] = Object.entries(groupedCarts).map(([vendor, items]) => ({
                     vendor: vendor as VendorType,
                     items,
                 }));
-    
+
                 set({ carts: normalizedCarts, loading: false });
             } else {
                 set({ carts: [], loading: false });
@@ -220,15 +209,15 @@ const useCartStore = create<CartStore>((set, get) => ({
             set({ loading: false, error: 'Failed to fetch cart from cloud' });
         }
     },
-    
+
     getCartByVendor: (vendor) => {
         const cart = get().carts.find(cart => cart.vendor === vendor);
         return cart ? cart.items : [];
     },
-    
+
     getVendorCarts: () => get().carts,
-    
-    getTotalItems: () => get().carts.reduce((total, cart) => 
+
+    getTotalItems: () => get().carts.reduce((total, cart) =>
         total + cart.items.reduce((sum, item) => sum + parseFloat((item.quantity * item.price).toFixed(2)), 0), 0)
 }));
 

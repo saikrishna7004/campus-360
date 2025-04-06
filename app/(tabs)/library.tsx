@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Modal from 'react-native-modal';
 import axios from 'axios';
-import { Sheet, useSheetRef } from '@/components/nativewindui/Sheet';
-import { BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import useAuthStore from '@/store/authStore';
 
 type Book = {
     _id: string;
@@ -15,14 +15,17 @@ type Book = {
     count: number;
     requestDate?: Date;
     deadline?: Date;
+    pdfUrl?: string;
 };
 
 const Library = () => {
     const [books, setBooks] = useState<Book[]>([]);
     const [userBooks, setUserBooks] = useState<Book[]>([]);
-
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const { getAuthHeader } = useAuthStore();
+
+    const bottomSheetRef = React.useRef<BottomSheetModal>(null);
 
     const fetchBooks = async () => {
         try {
@@ -31,18 +34,14 @@ const Library = () => {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-            console.log(data);
             setBooks(data);
         } catch (err) {
             console.error("Error fetching books:", err);
         }
     };
 
-
     useEffect(() => {
-        console.log("sumanth");
         fetchBooks();
-        console.log("sumanth");
     }, []);
 
     const borrowBook = async (book: Book) => {
@@ -57,12 +56,13 @@ const Library = () => {
         }
 
         try {
-            const response = await axios.post(process.env.EXPO_PUBLIC_API_URL + `/books/borrow/${book._id}`);
+            const response = await axios.post(process.env.EXPO_PUBLIC_API_URL + `/books/borrow/${book._id}`, {
+                headers: getAuthHeader(),
+            });
             const updatedBook = response.data;
 
             const newBook = { ...updatedBook, requestDate: new Date(), deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) };
             setUserBooks([...userBooks, newBook]);
-
             setBooks(books.map(b => (b._id === updatedBook._id ? updatedBook : b)));
 
             Alert.alert('Success', `You borrowed ${book.title}`);
@@ -74,27 +74,25 @@ const Library = () => {
 
     const openModal = (book: Book) => {
         setSelectedBook(book);
-        setModalVisible(true);
+        bottomSheetRef.current?.present();
     };
 
     const closeModal = () => {
         setSelectedBook(null);
-        setModalVisible(false);
+        bottomSheetRef.current?.dismiss();
     };
-    const bottomSheetModalRef = useSheetRef();
 
-    React.useEffect(() => {
-        bottomSheetModalRef.current?.present();
-    }, []);
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchBooks();
+        setRefreshing(false);
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-white">
-            <ScrollView contentContainerStyle={{ paddingBottom: 40 }}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={false}
-                        onRefresh={fetchBooks}
-                    />
-                }
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
                 <View className="px-4">
                     <Text className="text-2xl font-bold mb-4 text-black">Library</Text>
@@ -108,7 +106,7 @@ const Library = () => {
                                 <View key={item._id} className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-100">
                                     <Text className="text-lg font-semibold text-black">{item.title} by {item.author}</Text>
                                     <Text className="text-sm text-gray-600">Deadline: {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'N/A'}</Text>
-                                    {/* <Image source={{ uri: item.image }} className="w-20 h-20 mt-2 rounded-lg" /> */}
+                                    <Image source={{ uri: item.image }} className="w-20 h-20 mt-2 rounded-lg" />
                                 </View>
                             ))
                         )}
@@ -117,15 +115,18 @@ const Library = () => {
                     <Text className="text-xl font-bold mb-2 text-black">Available Books:</Text>
                     <View className="flex flex-wrap flex-row justify-between">
                         {books.map((item) => (
-                            <View key={item._id} className="w-1/3 p-2">
+                            <View key={item._id} className="w-1/2 p-2">
                                 <View className="border border-gray-300 rounded-lg bg-gray-100 p-2">
-                                    <Image source={{ uri: item.image }} className="w-full h-40 rounded-lg" />
+                                    <View className="object-contain h-40">
+                                        <Image source={{ uri: item.image }} className="h-40 rounded-lg" />
+                                    </View>
                                     <Text className="text-lg font-semibold text-black mt-2">{item.title}</Text>
                                     <TouchableOpacity
                                         onPress={() => openModal(item)}
-                                        className="mt-2 px-4 py-2 rounded-lg bg-green-600"
+                                        className="flex flex-row mt-2 px-4 py-2"
                                     >
-                                        <Text className="text-white font-semibold">Details</Text>
+                                        <Text className="text-green-700 font-semibold">Details</Text>
+                                        <MaterialCommunityIcons name="chevron-right" size={24} color="green" />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -135,36 +136,47 @@ const Library = () => {
             </ScrollView>
 
             {selectedBook && (
-                <Sheet ref={bottomSheetModalRef} snapPoints={[200]}>
-                    <BottomSheetView>
-                        <View className="bg-white p-4 rounded-t-lg">
-                            <Image source={{ uri: selectedBook.image }} className="w-full h-40 rounded-lg" />
-                            <Text className="text-xl font-bold text-black mt-2">{selectedBook.title}</Text>
-                            <Text className="text-lg text-gray-600 mt-1">by {selectedBook.author}</Text>
-                            <Text className="text-sm text-gray-600 mt-1">Available: {selectedBook.available ? 'Yes' : 'No'}</Text>
-                            <Text className="text-sm text-gray-600 mt-1">Count: {selectedBook.count}</Text>
-                            {selectedBook.count > 0 ? (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        borrowBook(selectedBook);
-                                        closeModal();
-                                    }}
-                                    className="mt-4 px-4 py-2 rounded-lg bg-green-600"
-                                >
-                                    <Text className="text-white font-semibold">Borrow</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <Text className="mt-4 text-red-600 font-semibold">Out of Stock</Text>
-                            )}
+                <BottomSheetModal
+                    ref={bottomSheetRef}
+                    index={0} 
+                    snapPoints={[450]} 
+                    onDismiss={closeModal}
+                >
+                    <View className="bg-white p-4 rounded-t-lg">
+                        <Image source={{ uri: selectedBook.image }} className="w-full h-40 rounded-lg" />
+                        <Text className="text-xl font-bold text-black mt-2">{selectedBook.title}</Text>
+                        <Text className="text-lg text-gray-600 mt-1">by {selectedBook.author}</Text>
+                        <Text className="text-sm text-gray-600 mt-1">Available: {selectedBook.available ? 'Yes' : 'No'}</Text>
+                        <Text className="text-sm text-gray-600 mt-1">Count: {selectedBook.count}</Text>
+                        {selectedBook.pdfUrl && (
                             <TouchableOpacity
-                                onPress={closeModal}
-                                className="mt-2 px-4 py-2 rounded-lg bg-gray-600"
+                                onPress={() => Alert.alert('PDF Link', selectedBook.pdfUrl)}
+                                className="mt-4 px-4 py-2 rounded-lg bg-blue-600"
                             >
-                                <Text className="text-white font-semibold">Close</Text>
+                                <Text className="text-white font-semibold">View PDF</Text>
                             </TouchableOpacity>
-                        </View>
-                    </BottomSheetView>
-                </Sheet>
+                        )}
+                        {selectedBook.count > 0 ? (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    borrowBook(selectedBook);
+                                    closeModal();
+                                }}
+                                className="mt-4 px-4 py-2 rounded-lg bg-green-600"
+                            >
+                                <Text className="text-white font-semibold">Borrow</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <Text className="mt-4 text-red-600 font-semibold">Out of Stock</Text>
+                        )}
+                        <TouchableOpacity
+                            onPress={closeModal}
+                            className="mt-2 px-4 py-2 rounded-lg bg-gray-600"
+                        >
+                            <Text className="text-white font-semibold">Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </BottomSheetModal>
             )}
         </SafeAreaView>
     );
