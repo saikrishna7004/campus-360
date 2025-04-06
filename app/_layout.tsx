@@ -7,8 +7,9 @@ import 'react-native-reanimated'
 import "@/global.css"
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import CartSummary from '@/components/Cart'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import useCartStore from '@/store/cartStore';
+import useAuthStore from '@/store/authStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,11 +18,27 @@ export default function RootLayout() {
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     });
 
+    const { fetchCartFromCloud } = useCartStore();
+    const { isAuthenticated, getAuthHeader } = useAuthStore();
+
     useEffect(() => {
         if (loaded) {
             SplashScreen.hideAsync();
         }
     }, [loaded]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const loadCart = async () => {
+                try {
+                    await fetchCartFromCloud(getAuthHeader());
+                } catch (error) {
+                    console.error('Failed to fetch latest cart:', error);
+                }
+            };
+            loadCart();
+        }
+    }, [isAuthenticated]);
 
     if (!loaded) {
         return null;

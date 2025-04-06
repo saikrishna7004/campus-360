@@ -40,7 +40,7 @@ const Home = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top', 'left', 'right']}>
-            <StatusBar barStyle="light-content" backgroundColor="white" />
+            <StatusBar barStyle="dark-content" backgroundColor="white" />
 
             <View className="flex-row align-items-center p-4" style={styles.header}>
                 <TouchableOpacity onPress={openSidebar}>
@@ -79,7 +79,7 @@ const Home = () => {
                                 {
                                     Object.entries(studentOptions).map(([key, { name, icon, color, url }]) => (
                                         <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 60, height: 60 }} />
+                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
                                             <Text className="text-green-900 text-sm mt-2">{name}</Text>
                                         </TouchableOpacity>
                                     ))
@@ -96,7 +96,7 @@ const Home = () => {
                                 {
                                     Object.entries(vendorOptions).map(([key, { name, icon, color, url }]) => (
                                         <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 60, height: 60 }} />
+                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
                                             <Text className="text-green-900 text-sm mt-2">{name}</Text>
                                         </TouchableOpacity>
                                     ))
@@ -104,7 +104,7 @@ const Home = () => {
                                 {
                                     Object.entries(adminOptions).map(([key, { name, icon, color, url }]) => (
                                         <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 60, height: 60 }} />
+                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
                                             <Text className="text-green-900 text-sm mt-2">{name}</Text>
                                         </TouchableOpacity>
                                     ))

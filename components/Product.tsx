@@ -1,6 +1,7 @@
 import useCartStore from '@/store/cartStore'
 import { View, Image, Text, TouchableOpacity } from 'react-native'
 import type { VendorType } from '@/store/cartStore'
+import { cn } from '@/lib/cn'
 
 interface ProductItem {
     _id: string
@@ -12,7 +13,7 @@ interface ProductItem {
     imageUrl?: string
 }
 
-const Product = ({ item, vendor }: { item: ProductItem, vendor?: VendorType }) => {
+const Product = ({ item, vendor, rootClassName }: { item: ProductItem, vendor?: VendorType, rootClassName?: string }) => {
     const { getCartByVendor, addToCart, decreaseQuantity } = useCartStore()
     
     const vendorValue = vendor || 'default'
@@ -34,7 +35,7 @@ const Product = ({ item, vendor }: { item: ProductItem, vendor?: VendorType }) =
     }
 
     return (
-        <View className="flex-row justify-between items-center px-4 py-2">
+        <View className={cn("flex-row justify-between items-center px-4 py-2", rootClassName)}>
             <Image 
                 className="rounded-lg h-[60px] w-[60px]" 
                 width={60} 

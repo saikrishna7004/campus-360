@@ -11,7 +11,7 @@ import { VENDOR_NAMES } from '@/constants/types';
 const { height: screenHeight } = Dimensions.get('window');
 
 const CartSummary = () => {
-    const { carts, clearCart, fetchCartFromCloud } = useCartStore();
+    const { carts = [], clearCart, fetchCartFromCloud } = useCartStore();
     const { isAuthenticated, getAuthHeader } = useAuthStore();
     const router = useRouter();
     const [viewAll, setViewAll] = useState(false);
@@ -78,7 +78,7 @@ const CartSummary = () => {
         }
     }, [carts, isAuthenticated]);
 
-    if (carts.length === 0) return <SafeAreaView className="flex-1 -mb-12"></SafeAreaView>;
+    if (!carts || carts.length === 0) return null;
 
     return (
         <SafeAreaView className="relative bg-transparent flex-1">
@@ -108,7 +108,7 @@ const CartSummary = () => {
                             <Text className="text-[18px] font-semibold">Your Carts ({carts.length})</Text>
                             <TouchableOpacity
                                 className="flex flex-row items-center gap-2 bg-white border border-gray-200 px-3 py-1 rounded-lg"
-                                onPress={() => router.replace('/checkout')}
+                                onPress={() => router.push('/checkout')}
                                 style={{ boxShadow: '0px 0px 10px #0a0a0a0f' }}
                             >
                                 <Text className="text-green-700 text-sm font-semibold">Checkout all</Text>
@@ -125,6 +125,8 @@ const CartSummary = () => {
                     )}
 
                     {carts.map((cart, index) => {
+                        if (!cart || !cart.items) return null;
+
                         const vendorTotalPrice = cart.items.reduce(
                             (acc, item) => acc + parseFloat((item.price * item.quantity).toFixed(2)), 0
                         );

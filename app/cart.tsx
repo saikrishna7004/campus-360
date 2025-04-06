@@ -149,7 +149,7 @@ const Cart = () => {
         );
     }
 
-    const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const totalPrice = cartItems?.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
     return (
         <SafeAreaView className="flex-1 bg-gray-100">
@@ -160,7 +160,7 @@ const Cart = () => {
                 }
                 contentContainerStyle={{ paddingBottom: 340 }}
             >
-                <View className="flex mx-3 mb-4 bg-white rounded-2xl">
+                <View className="flex mx-3 mb-4 py-2 bg-white rounded-2xl">
                     {cartItems.map((item) => (
                         <CartProduct
                             key={`${item._id}-${item.name}`}
@@ -174,11 +174,11 @@ const Cart = () => {
                     </View>
                     <View>
                         <View className="flex flex-row items-center px-4">
-                            <Text className="text-gray-800 me-1">Delivery in</Text>
-                            <Text className="font-bold text-gray-800">10 min</Text>
+                            <Text className="font-medium text-gray-800 me-1">Pick up in</Text>
+                            <Text className="font-bold text-gray-800">10 minutes</Text>
                         </View>
                         <View className="flex flex-row justify-between items-center px-4 mt-1">
-                            <Text className="font-medium text-gray-800">Schedule for later</Text>
+                            <Text className="text-xs text-gray-800">(Time is approximated)</Text>
                         </View>
                     </View>
                 </View>

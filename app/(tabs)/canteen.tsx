@@ -27,7 +27,7 @@ const Canteen: React.FC = () => {
     const fetchMenuItems = async () => {
         try {
             const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/product/canteen`)
-            console.log('Menu items fetched:', response.data)
+            // console.log('Menu items fetched:', response.data)
             setMenuItems(response.data)
         } catch (error) {
             console.error('Error fetching menu items:', error)

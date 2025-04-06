@@ -1,6 +1,7 @@
+import { cn } from '@/lib/cn'
 import useCartStore from '@/store/cartStore'
 import { FontAwesome } from '@expo/vector-icons'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
 
 interface CartProductItem {
     _id: string
@@ -8,11 +9,12 @@ interface CartProductItem {
     price: number
     category?: string
     vendor: string
+    imageUrl?: string
 }
 
-const CartProduct = ({ item }: { item: CartProductItem }) => {
+const CartProduct = ({ item, rootClassName, iconClassName }: { item: CartProductItem, rootClassName?: string, iconClassName?: string }) => {
     const { getCartByVendor, addToCart, decreaseQuantity } = useCartStore()
-    
+
     const vendor: 'canteen' | 'stationery' | 'default' = (item.vendor as 'canteen' | 'stationery' | 'default') || 'default'
     const cart = getCartByVendor(vendor)
     const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
@@ -31,8 +33,15 @@ const CartProduct = ({ item }: { item: CartProductItem }) => {
     }
 
     return (
-        <View className="flex-row justify-between items-center ps-2 pe-4 py-2 my-2">
-            <FontAwesome className='ps-2' name="leaf" size={20} color="green" />
+        <View className={cn("flex-row justify-between items-center px-4 py-2", rootClassName)}>
+            <Image
+                className={cn("rounded-lg h-[60px] w-[60px]", iconClassName)}
+                width={60}
+                height={60}
+                source={{
+                    uri: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
+                }}
+            />
             <View className="flex-1 px-4">
                 <Text className="font-semibold pb-1 text-black">{item.name}</Text>
                 <Text className="text-md text-black">₹{item.price}</Text>
@@ -45,7 +54,7 @@ const CartProduct = ({ item }: { item: CartProductItem }) => {
                     >
                         <Text className="text-green-700 font-bold">-</Text>
                     </TouchableOpacity>
-                    <Text className="text-lg px-1 text-black">{itemInCart.quantity}</Text>
+                    <Text className="px-1 text-black">{itemInCart.quantity}</Text>
                     <TouchableOpacity
                         onPress={handleAddToCart}
                         className="px-3 py-1 text-green-700 rounded-lg"

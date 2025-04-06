@@ -22,6 +22,7 @@ interface CartStore {
     carts: VendorCart[];
     loading: boolean;
     error: string | null;
+    authHeader?: () => any;
     addToCart: (item: Omit<CartItem, 'quantity'>) => void;
     removeFromCart: (id: string, vendor: string) => void;
     increaseQuantity: (id: string, vendor: string) => void;
@@ -33,6 +34,18 @@ interface CartStore {
     getVendorCarts: () => VendorCart[];
     getTotalItems: () => number;
 }
+
+const syncCartWithCloud = async (get: any, set: any, authHeader: any) => {
+    try {
+        await axios.post(
+            `${process.env.EXPO_PUBLIC_API_URL}/cart/sync`,
+            { carts: get().carts },
+            { headers: authHeader }
+        );
+    } catch (error) {
+        set({ error: 'Failed to sync cart to cloud' });
+    }
+};
 
 const useCartStore = create<CartStore>((set, get) => ({
     carts: [],
@@ -51,9 +64,12 @@ const useCartStore = create<CartStore>((set, get) => ({
                 
                 if (existingItemIndex >= 0) {
                     existingCart.items[existingItemIndex].quantity += 1;
-                    existingCart.items[existingItemIndex].price = parseFloat(existingCart.items[existingItemIndex].price.toFixed(2));
                 } else {
-                    existingCart.items.push({ ...item, quantity: 1, price: parseFloat(item.price.toFixed(2)) });
+                    existingCart.items.push({
+                        ...item,
+                        quantity: 1,
+                        imageUrl: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
+                    });
                 }
                 
                 return { carts: updatedCarts };
@@ -64,11 +80,20 @@ const useCartStore = create<CartStore>((set, get) => ({
                     ...state.carts,
                     {
                         vendor,
-                        items: [{ ...item, quantity: 1, price: parseFloat(item.price.toFixed(2)) }]
-                    }
-                ]
+                        items: [{
+                            ...item,
+                            quantity: 1,
+                            imageUrl: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
+                        }],
+                    },
+                ],
             };
         });
+
+        const authHeader = get().authHeader?.();
+        if (authHeader) {
+            syncCartWithCloud(get, set, authHeader);
+        }
     },
     
     removeFromCart: (id, vendor) => {
@@ -79,6 +104,11 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             ).filter(cart => cart.items.length > 0)
         }));
+
+        const authHeader = get().authHeader?.();
+        if (authHeader) {
+            syncCartWithCloud(get, set, authHeader);
+        }
     },
     
     increaseQuantity: (id, vendor) => {
@@ -96,6 +126,11 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             )
         }));
+
+        const authHeader = get().authHeader?.();
+        if (authHeader) {
+            syncCartWithCloud(get, set, authHeader);
+        }
     },
     
     decreaseQuantity: (id, vendor) => {
@@ -113,6 +148,11 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             ).filter(cart => cart.items.length > 0)
         }));
+
+        const authHeader = get().authHeader?.();
+        if (authHeader) {
+            syncCartWithCloud(get, set, authHeader);
+        }
     },
     
     clearCart: (vendor) => {
@@ -121,6 +161,11 @@ const useCartStore = create<CartStore>((set, get) => ({
                 ? state.carts.filter(cart => cart.vendor !== vendor)
                 : []
         }));
+
+        const authHeader = get().authHeader?.();
+        if (authHeader) {
+            syncCartWithCloud(get, set, authHeader);
+        }
     },
     
     syncCartToCloud: async (authHeader) => {
@@ -141,13 +186,37 @@ const useCartStore = create<CartStore>((set, get) => ({
         set({ loading: true, error: null });
         try {
             const response = await axios.get(
-                `${process.env.EXPO_PUBLIC_API_URL}/cart`,
+                `${process.env.EXPO_PUBLIC_API_URL}/cart/latest`,
                 { headers: authHeader }
             );
-            if (response.data?.carts) {
-                set({ carts: response.data.carts, loading: false });
+            if (response.data?.cart) {
+                const groupedCarts: Record<VendorType, CartItem[]> = response.data.cart.items.reduce((acc: Record<VendorType, CartItem[]>, cartItem: any) => {
+                    const vendor = cartItem.item.type || 'default';
+                    if (!acc[vendor as VendorType]) {
+                        acc[vendor as VendorType] = [];
+                    }
+                    acc[vendor as VendorType].push({
+                        _id: cartItem.item._id,
+                        name: cartItem.item.name,
+                        price: cartItem.item.price,
+                        quantity: cartItem.quantity,
+                        imageUrl: cartItem.item.imageUrl || cartItem.item.image,
+                        vendor: vendor as VendorType,
+                    });
+                    return acc;
+                }, {} as Record<VendorType, CartItem[]>);
+    
+                const normalizedCarts: VendorCart[] = Object.entries(groupedCarts).map(([vendor, items]) => ({
+                    vendor: vendor as VendorType,
+                    items,
+                }));
+    
+                set({ carts: normalizedCarts, loading: false });
+            } else {
+                set({ carts: [], loading: false });
             }
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Error fetching latest cart:', error.response?.data || error.message);
             set({ loading: false, error: 'Failed to fetch cart from cloud' });
         }
     },
