@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useAuthStore from '@/store/authStore';
 
@@ -19,13 +19,13 @@ type Book = {
 };
 
 const Library = () => {
+    const { getAuthHeader } = useAuthStore();
     const [books, setBooks] = useState<Book[]>([]);
     const [userBooks, setUserBooks] = useState<Book[]>([]);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [refreshing, setRefreshing] = useState(false);
-    const { getAuthHeader } = useAuthStore();
-
-    const bottomSheetRef = React.useRef<BottomSheetModal>(null);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const snapPoints = useMemo(() => ['50%', '75%'], []);
 
     const fetchBooks = async () => {
         try {
@@ -56,9 +56,11 @@ const Library = () => {
         }
 
         try {
-            const response = await axios.post(process.env.EXPO_PUBLIC_API_URL + `/books/borrow/${book._id}`, {
-                headers: getAuthHeader(),
-            });
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_API_URL}/books/borrow/${book._id}`,
+                {},
+                { headers: getAuthHeader() }
+            );
             const updatedBook = response.data;
 
             const newBook = { ...updatedBook, requestDate: new Date(), deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) };
@@ -74,12 +76,12 @@ const Library = () => {
 
     const openModal = (book: Book) => {
         setSelectedBook(book);
-        bottomSheetRef.current?.present();
+        bottomSheetRef.current?.expand();
     };
 
     const closeModal = () => {
         setSelectedBook(null);
-        bottomSheetRef.current?.dismiss();
+        bottomSheetRef.current?.close();
     };
 
     const onRefresh = async () => {
@@ -103,10 +105,15 @@ const Library = () => {
                             <Text className="text-lg text-gray-600">None</Text>
                         ) : (
                             userBooks.map((item) => (
-                                <View key={item._id} className="mb-4 p-4 border border-gray-300 rounded-lg bg-gray-100">
-                                    <Text className="text-lg font-semibold text-black">{item.title} by {item.author}</Text>
-                                    <Text className="text-sm text-gray-600">Deadline: {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'N/A'}</Text>
-                                    <Image source={{ uri: item.image }} className="w-20 h-20 mt-2 rounded-lg" />
+                                <View key={item._id} className="flex flex-row mb-4 border border-gray-300 rounded-lg bg-gray-100">
+                                    <View className="">
+                                        <Image source={{ uri: item.image }} style={{height: 100, width: 75}} className="rounded-lg" />
+                                    </View>
+                                    <View className="justify-center ml-4 mb-1">
+                                        <Text className="text-lg font-semibold text-black">{item.title}</Text>
+                                        <Text className="text-sm text-gray-600">by {item.author}</Text>
+                                        <Text className="text-sm text-gray-600">Deadline: {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'N/A'}</Text>
+                                    </View>
                                 </View>
                             ))
                         )}
@@ -116,18 +123,20 @@ const Library = () => {
                     <View className="flex flex-wrap flex-row justify-between">
                         {books.map((item) => (
                             <View key={item._id} className="w-1/2 p-2">
-                                <View className="border border-gray-300 rounded-lg bg-gray-100 p-2">
-                                    <View className="object-contain h-40">
+                                <View className="border border-gray-300 rounded-lg bg-gray-50">
+                                    <View className="object-contain">
                                         <Image source={{ uri: item.image }} className="h-40 rounded-lg" />
                                     </View>
-                                    <Text className="text-lg font-semibold text-black mt-2">{item.title}</Text>
-                                    <TouchableOpacity
-                                        onPress={() => openModal(item)}
-                                        className="flex flex-row mt-2 px-4 py-2"
-                                    >
-                                        <Text className="text-green-700 font-semibold">Details</Text>
-                                        <MaterialCommunityIcons name="chevron-right" size={24} color="green" />
-                                    </TouchableOpacity>
+                                    <View className="px-3">
+                                        <Text className="text-[14px] font-semibold text-black mt-2">{item.title}</Text>
+                                        <TouchableOpacity
+                                            onPress={() => openModal(item)}
+                                            className="flex flex-row py-2"
+                                        >
+                                            <Text className="text-green-700 font-semibold">Details</Text>
+                                            <MaterialCommunityIcons name="chevron-right" size={24} color="green" />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         ))}
@@ -135,50 +144,63 @@ const Library = () => {
                 </View>
             </ScrollView>
 
-            {selectedBook && (
-                <BottomSheetModal
-                    ref={bottomSheetRef}
-                    index={0} 
-                    snapPoints={[450]} 
-                    onDismiss={closeModal}
-                >
-                    <View className="bg-white p-4 rounded-t-lg">
-                        <Image source={{ uri: selectedBook.image }} className="w-full h-40 rounded-lg" />
+            <BottomSheet
+                ref={bottomSheetRef}
+                snapPoints={snapPoints}
+                enablePanDownToClose
+                index={-1}
+                onClose={closeModal}
+                backdropComponent={({ style }) => (
+                    selectedBook && <View style={[style, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
+                )}
+            >
+                {selectedBook && (
+                    <BottomSheetView className="p-5">
+                        <Image source={{ uri: selectedBook.image }} style={{ height: 160, width: 125 }} className="rounded-lg self-center" />
                         <Text className="text-xl font-bold text-black mt-2">{selectedBook.title}</Text>
                         <Text className="text-lg text-gray-600 mt-1">by {selectedBook.author}</Text>
-                        <Text className="text-sm text-gray-600 mt-1">Available: {selectedBook.available ? 'Yes' : 'No'}</Text>
+                        <Text className="text-sm text-gray-600 mt-1">Available: {selectedBook.count > 0 ? 'Yes' : 'No'}</Text>
                         <Text className="text-sm text-gray-600 mt-1">Count: {selectedBook.count}</Text>
-                        {selectedBook.pdfUrl && (
+                        <View className="flex flex-row gap-2 items-center mt-4">
+                            {selectedBook.pdfUrl && (
+                                <TouchableOpacity
+                                    onPress={() => Alert.alert(
+                                        'External Link',
+                                        `You are about to visit an external link: \n\n${selectedBook.pdfUrl}. \n\nDo you want to continue?`,
+                                        [
+                                            { text: 'Cancel', style: 'cancel' },
+                                            { text: 'OK', onPress: () => Linking.openURL(selectedBook.pdfUrl as string) },
+                                        ]
+                                    )}
+                                    className="px-4 py-2 rounded-lg bg-blue-600"
+                                >
+                                    <Text className="text-white font-semibold">View PDF</Text>
+                                </TouchableOpacity>
+                            )}
+                            {selectedBook.count > 0 ? (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        borrowBook(selectedBook);
+                                        closeModal();
+                                    }}
+                                    className="px-4 py-2 rounded-lg bg-green-600"
+                                >
+                                    <Text className="text-white font-semibold">Borrow</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <Text className="text-red-600 font-semibold">Out of Stock</Text>
+                            )}
                             <TouchableOpacity
-                                onPress={() => Alert.alert('PDF Link', selectedBook.pdfUrl)}
-                                className="mt-4 px-4 py-2 rounded-lg bg-blue-600"
+                                onPress={closeModal}
+                                className="px-4 py-2 rounded-lg bg-gray-600"
                             >
-                                <Text className="text-white font-semibold">View PDF</Text>
+                                <Text className="text-white font-semibold">Close</Text>
                             </TouchableOpacity>
-                        )}
-                        {selectedBook.count > 0 ? (
-                            <TouchableOpacity
-                                onPress={() => {
-                                    borrowBook(selectedBook);
-                                    closeModal();
-                                }}
-                                className="mt-4 px-4 py-2 rounded-lg bg-green-600"
-                            >
-                                <Text className="text-white font-semibold">Borrow</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <Text className="mt-4 text-red-600 font-semibold">Out of Stock</Text>
-                        )}
-                        <TouchableOpacity
-                            onPress={closeModal}
-                            className="mt-2 px-4 py-2 rounded-lg bg-gray-600"
-                        >
-                            <Text className="text-white font-semibold">Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </BottomSheetModal>
-            )}
-        </SafeAreaView>
+                        </View>
+                    </BottomSheetView>
+                )}
+        </BottomSheet>
+        </SafeAreaView >
     );
 };
 

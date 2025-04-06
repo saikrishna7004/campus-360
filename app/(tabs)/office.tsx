@@ -1,181 +1,137 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, TextInput, ScrollView, SafeAreaView, Animated } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, SafeAreaView, Alert } from 'react-native';
+import BottomSheet, { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import axios from 'axios';
+import useAuthStore from '../../store/authStore';
 
 const Office = () => {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Bonafide', description: 'Get bonafide for reasons' },
-    { id: 2, title: 'Leave Application', description: 'Apply for leave' },
-  ]);
+    const { getAuthHeader } = useAuthStore();
 
-  const [previousRequests, setPreviousRequests] = useState([
-    { id: 1, title: 'Bonafide', description: 'Get bonafide for reasons' },
-    { id: 2, title: 'Leave Application', description: 'Apply for leave' },
-  ]);
-
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [previousIsExpanded, setPreviousIsExpanded] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
-  const [reason, setReason] = useState('');
-
-  const handleShowMore = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const handlePreviousShowMore = () => {
-    setPreviousIsExpanded(!previousIsExpanded);
-  };
-
-  const handleSendReason = () => {
-    if (reason.trim()) {
-      Alert.alert('Reason Sent', `Your reason: "${reason}" for "${selectedTask?.title}" has been sent.`);
-      setReason('');
-    } else {
-      Alert.alert('Error', 'Please provide a reason.');
+    interface Task {
+        id: number;
+        title: string;
+        type: string;
+        description?: string;
     }
-  };
 
-  const handleCloseReasonInput = () => {
-    setSelectedTask(null);
-    setReason('');
-  };
-
-  const renderShowMoreButton = () => {
-    if (tasks.length > 2) {
-      return (
-        <TouchableOpacity onPress={handleShowMore} className="items-center mt-2">
-          <Text className="text-blue-500 text-lg">
-            {isExpanded ? 'Show Less' : 'Show More'}
-          </Text>
-        </TouchableOpacity>
-      );
+    interface PreviousRequest {
+        _id: string;
+        type: string;
+        reason: string;
+        status: string;
+        description?: string;
     }
-  };
 
-  const renderPreviousShowMoreButton = () => {
-    if (previousRequests.length > 2) {
-      return (
-        <TouchableOpacity onPress={handlePreviousShowMore} className="items-center mt-2">
-          <Text className="text-blue-500 text-lg">
-            {previousIsExpanded ? 'Show Less' : 'Show More'}
-          </Text>
-        </TouchableOpacity>
-      );
-    }
-  };
+    const [tasks, setTasks] = useState<Task[]>([
+        { id: 1, title: 'Bonafide', type: 'bonafide', description: 'Request for a bonafide certificate' },
+        { id: 2, title: 'Leave Application', type: 'leave', description: 'Request for leave' },
+        { id: 3, title: 'Bus Pass Approval', type: 'bus-pass', description: 'Request for bus pass approval' },
+        { id: 4, title: 'TS E-pass', type: 'ts-epass', description: 'Request for TS E-pass' },
+        { id: 5, title: 'Other', type: 'other', description: 'Request for other services' },
+    ]);
 
-  return (
-    <SafeAreaView className="flex-1">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <Text className="text-2xl font-bold mb-5">Previous Requests</Text>
+    const [previousRequests, setPreviousRequests] = useState<PreviousRequest[]>([]);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [reason, setReason] = useState('');
 
-        {previousIsExpanded
-          ? previousRequests.map((item) => (
-              <View key={item.id} className="mb-5">
-                <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
-                  <View className="flex-1">
-                    <Text className="text-xl font-bold text-left">{item.title}</Text>
-                    <Text className="text-left">{item.description}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert('More Info', `Details for ${item.title}`);
-                    }}
-                    className="ml-4 bg-green-800 px-6 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-bold">More Info</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          : previousRequests.slice(0, 2).map((item) => (
-              <View key={item.id} className="mb-5">
-                <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
-                  <View className="flex-1">
-                    <Text className="text-xl font-bold text-left">{item.title}</Text>
-                    <Text className="text-left">{item.description}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert('More Info', `Details for ${item.title}`);
-                    }}
-                    className="ml-4 bg-green-800 px-6 py-2 rounded-lg"
-                  >
-                    <Text className="text-white font-bold">More Info</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const snapPoints = useMemo(() => ['50%', '75%'], []);
 
-        {renderPreviousShowMoreButton()}
+    useEffect(() => {
+        const fetchRequests = async () => {
+            const response = await axios.get('/api/office/user', { headers: getAuthHeader() });
+            setPreviousRequests(response.data);
+        };
+        fetchRequests();
+    }, []);
 
-        <Text className="text-2xl font-bold my-5">Your Requests</Text>
+    const handleSendReason = async () => {
+        if (reason.trim() && selectedTask) {
+            try {
+                await axios.post(process.env.EXPO_PUBLIC_API_URL + '/office/create', {
+                    type: selectedTask.type,
+                    reason,
+                }, { headers: getAuthHeader() });
+                setReason('');
+                setSelectedTask(null);
+                bottomSheetRef.current?.close();
+                Alert.alert('Success', 'Request Submitted Successfully');
+                const response = await axios.get(process.env.EXPO_PUBLIC_API_URL + '/office/user', { headers: getAuthHeader() });
+                setPreviousRequests(response.data);
+            } catch (error) {
+                console.log('Error submitting request:', error);
+                Alert.alert('Error', 'Failed to submit the request. Please try again.');
+            }
+        } else {
+            Alert.alert('Error', 'Please provide a reason before submitting.');
+        }
+    };
 
-        {isExpanded
-          ? tasks.map((item) => (
-              <View key={item.id} className="mb-5">
-                <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
-                  <View className="">
-                    <Text className="text-xl font-bold text-left">{item.title}</Text>
-                    <Text className="text-left">{item.description}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedTask(item);
-                    }}
-                    className="ml-4 bg-green-800 px-6 py-2 rounded-lg"
-                  >
-                    <Text className="text-white">Request</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          : tasks.slice(0, 2).map((item) => (
-              <View key={item.id} className="mb-5">
-                <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
-                  <View className="flex-1">
-                    <Text className="text-xl font-bold text-left">{item.title}</Text>
-                    <Text className="text-left">{item.description}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedTask(item);
-                    }}
-                    className="ml-4 bg-green-800 px-6 py-2 rounded-lg"
-                  >
-                    <Text className="text-white">Request</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+    return (
+        <SafeAreaView className="flex-1">
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+                <Text className="text-2xl font-bold mb-5">Previous Requests</Text>
+                {previousRequests.map((item) => (
+                    <View key={item._id} className="mb-5">
+                        <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
+                            <View className="flex-1">
+                                <Text className="text-xl font-bold text-left capitalize">{item.type}</Text>
+                                <Text className="text-left">Reason: {item.reason}</Text>
+                                {item.description && <Text className="text-left text-gray-500">{item.description}</Text>}
 
-        {renderShowMoreButton()}
+                            </View>
+                            <View className="flex-1 items-end">
+                                <Text className={`text-lg font-bold ${item.status === 'approved' ? 'text-green-600' : item.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'}`}>
+                                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                ))}
+                <Text className="text-2xl font-bold my-5">Your Requests</Text>
+                {tasks.map((item) => (
+                    <View key={item.id} className="mb-5">
+                        <View className="flex flex-row justify-between items-center bg-white shadow-md rounded-lg p-4">
+                            <View className="">
+                                <Text className="text-xl font-bold text-left">{item.title}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setSelectedTask(item);
+                                    bottomSheetRef.current?.expand();
+                                }}
+                                className="ml-4 bg-green-800 px-6 py-2 rounded-lg"
+                            >
+                                <Text className="text-white">Request</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
 
-        {selectedTask && (
-          <View className="mt-5 p-5 bg-gray-200 rounded-lg">
-            <TouchableOpacity
-              onPress={handleCloseReasonInput}
-              className="absolute top-2 right-2 bg-white p-2 rounded-full z-10"
-            >
-              <Text className="text-xl font-bold text-red-500">×</Text>
-            </TouchableOpacity>
-
-            <Text className="text-2xl font-bold mb-3">Provide a Reason for {selectedTask?.title}</Text>
-
-            <TextInput
-              value={reason}
-              onChangeText={setReason}
-              placeholder="Enter your reason here..."
-              className="h-10 border border-gray-300 rounded-lg pl-3 mb-5"
-            />
-
-            <TouchableOpacity onPress={handleSendReason} className="bg-blue-500 px-6 py-2 rounded-lg">
-              <Text className="text-white font-bold">Send</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
-  );
+            <BottomSheet ref={bottomSheetRef} snapPoints={snapPoints} enablePanDownToClose index={-1} onClose={() => setSelectedTask(null)} backdropComponent={({ style }) => (
+                selectedTask && <View style={[style, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
+            )}>
+                <BottomSheetView className="p-5">
+                    <Text className="text-xl font-bold mb-3">{selectedTask?.title}</Text>
+                    <Text className="text-gray-600 mb-3">{selectedTask?.description}</Text>
+                    <Text className="text-xl font-bold mb-3">Provide a Reason</Text>
+                    <View className="flex mb-5">
+                        <TextInput
+                            value={reason}
+                            onChangeText={setReason}
+                            placeholder="Enter your reason here..."
+                            className="h-10 border border-gray-300 rounded-lg pl-3 mb-3"
+                        />
+                        <Text className="text-gray-600 mb-5">Students are required to meet the office staff in person in the next working day for recieving Bonafide or any other document after applying.</Text>
+                        <TouchableOpacity onPress={handleSendReason} className="bg-green-700 px-4 py-2 rounded-lg w-32">
+                            <Text className="text-white font-bold text-center">Place Request</Text>
+                        </TouchableOpacity>
+                    </View>
+                </BottomSheetView>
+            </BottomSheet>
+        </SafeAreaView>
+    );
 };
 
 export default Office;

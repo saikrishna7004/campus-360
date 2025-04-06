@@ -42,7 +42,7 @@ const Login = () => {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 className="flex-1"
             >
-                <View className="flex-1 justify-center px-6 py-8 mx-auto max-w-md">
+                <View className="flex-1 justify-center px-6 py-8 mx-auto w-full max-w-md">
                     <View className="items-center mb-8">
                         <View className="w-28 h-28 mb-4 bg-green-100 rounded-full justify-center items-center">
                             <FontAwesome name="graduation-cap" size={60} color="#166534" />
@@ -51,8 +51,8 @@ const Login = () => {
                         <Text className="text-sm text-gray-500 mt-1">Your one-stop campus solution</Text>
                     </View>
 
-                    <View className="space-y-4 bg-white p-5 rounded-lg shadow-sm">
-                        <View>
+                    <View className="bg-white rounded-lg shadow-sm">
+                        <View className="mb-3">
                             <Text className="text-gray-700 mb-1 ml-1 font-medium">Email</Text>
                             <TextInput
                                 className="bg-gray-100 px-4 py-3 rounded-md text-gray-800 border border-gray-200"
@@ -64,7 +64,7 @@ const Login = () => {
                             />
                         </View>
                         
-                        <View>
+                        <View className="mb-3">
                             <Text className="text-gray-700 mb-1 ml-1 font-medium">Password</Text>
                             <TextInput
                                 className="bg-gray-100 px-4 py-3 rounded-md text-gray-800 border border-gray-200"
