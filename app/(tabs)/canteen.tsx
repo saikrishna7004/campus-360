@@ -60,7 +60,7 @@ const Canteen: React.FC = () => {
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#000" colors={['#00f']} />
                 }
-                contentContainerStyle={{ paddingBottom: 40 }}
+                contentContainerStyle={{ paddingBottom: 100 }}
             >
                 <View className="flex flex-row me-2">
                     <View className="w-[80%]">

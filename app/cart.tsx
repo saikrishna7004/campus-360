@@ -9,12 +9,7 @@ import { FontAwesome } from '@expo/vector-icons'
 import CartProduct from '@/components/CartProduct'
 import * as NavigationBar from 'expo-navigation-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router'
-
-const VENDOR_NAMES: Record<VendorType, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VENDOR_NAMES } from '@/constants/types'
 
 const Cart = () => {
     const params = useLocalSearchParams();
@@ -167,9 +162,9 @@ const Cart = () => {
             >
                 <View className="flex mx-3 mb-4 bg-white rounded-2xl">
                     {cartItems.map((item) => (
-                        <CartProduct 
-                            key={`${item._id}-${item.name}`} 
-                            item={{...item, vendor}} 
+                        <CartProduct
+                            key={`${item._id}-${item.name}`}
+                            item={{ ...item, vendor }}
                         />
                     ))}
                 </View>

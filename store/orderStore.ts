@@ -92,7 +92,6 @@ const useOrderStore = create<OrderStore>((set, get) => ({
                 { headers: authHeader }
             );
             
-            // Ensure each order has a vendor field
             const orders = (response.data || []).map((order: Order) => ({
                 ...order,
                 vendor: order.vendor || 'default'

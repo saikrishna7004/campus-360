@@ -63,7 +63,7 @@ const Home = () => {
                 translateX={translateX}
             />
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
                 <View className="mb-4 px-4">
                     <Image
                         source={require('@/assets/images/banner.png')}

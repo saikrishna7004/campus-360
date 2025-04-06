@@ -1,4 +1,3 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Href } from "expo-router";
 
 type HomeMenuOptions = {
@@ -7,6 +6,12 @@ type HomeMenuOptions = {
     color: string;
     url: Href;
 }
+
+export const VENDOR_NAMES: Record<string, string> = {
+    'canteen': 'Canteen',
+    'stationery': 'Stationery',
+    'default': 'Campus Store'
+};
 
 export const studentOptions: Record<string, HomeMenuOptions> = {
     canteen: {
@@ -19,7 +24,7 @@ export const studentOptions: Record<string, HomeMenuOptions> = {
         name: 'Stationery',
         icon: 'https://icons.veryicon.com/png/o/education-technology/multicolor-education-icon2/stationery-20.png',
         color: '#1E3A8A',
-        url: '/stationary',
+        url: '/stationery',
     },
     library: {
         name: 'Library',

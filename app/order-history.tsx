@@ -7,13 +7,7 @@ import { useRouter } from 'expo-router';
 import useOrderStore, { Order, OrderItem } from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
 import * as NavigationBar from 'expo-navigation-bar';
-import { VendorType } from '@/store/cartStore';
-
-const VENDOR_NAMES: Record<VendorType, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VENDOR_NAMES } from '@/constants/types';
 
 const OrderHistory = (): React.ReactElement => {
     const router = useRouter();

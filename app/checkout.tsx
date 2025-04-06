@@ -8,12 +8,7 @@ import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import useOrderStore from '@/store/orderStore';
 import * as NavigationBar from 'expo-navigation-bar';
-
-const VENDOR_NAMES: Record<string, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VENDOR_NAMES } from '@/constants/types';
 
 const CheckoutPage = () => {
     const router = useRouter();
@@ -186,7 +181,7 @@ const CheckoutPage = () => {
                 
                 <View className="bg-white m-4 p-4 rounded-xl">
                     <Text className="text-lg font-bold mb-2">Payment Method</Text>
-                    <View className="flex-row items-center p-2 bg-gray-50 rounded-md">
+                    <View className="flex-row items-center p-2 bg-gray-50 rounded-md object-contain">
                         <Image 
                             source={{ uri: 'https://www.srcu4u.com/creditunion/wp-content/uploads/2019/07/Google-Pay-Logo-01.png' }} 
                             className="w-8 h-8 rounded-md mr-3"

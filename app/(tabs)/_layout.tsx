@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
 import useAuthStore from '@/store/authStore';
-import { TouchableOpacity, Text, SafeAreaView } from 'react-native';
 
 export default function TabsLayout() {
     const { user, isAuthenticated, logout } = useAuthStore();
@@ -14,7 +12,7 @@ export default function TabsLayout() {
             router.replace('/login');
         }
     }, [isAuthenticated, segments]);
-    
+
     if (!isAuthenticated || !user) {
         return null;
     }

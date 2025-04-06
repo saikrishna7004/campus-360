@@ -5,14 +5,8 @@ import useOrderStore from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-
-type VendorType = 'canteen' | 'stationery' | 'default';
-
-const VENDOR_NAMES: Record<VendorType, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VendorType } from '@/store/cartStore';
+import { VENDOR_NAMES } from '@/constants/types';
 
 const Orders = () => {
     const { fetchOrderHistory, activeOrders = [], orderHistory = [] } = useOrderStore();
@@ -80,16 +74,14 @@ const Orders = () => {
         >
             <View className="flex-row justify-between">
                 <Text className="font-bold">{VENDOR_NAMES[item.vendorName as VendorType] || item.vendorName}</Text>
-                <View className={`px-2 py-1 rounded-full ${
-                    item.status === 'preparing' ? 'bg-yellow-100' :
-                    item.status === 'ready' ? 'bg-blue-100' :
-                    item.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
-                }`}>
-                    <Text className={`text-xs font-medium ${
-                        item.status === 'preparing' ? 'text-yellow-800' :
-                        item.status === 'ready' ? 'text-blue-800' :
-                        item.status === 'completed' ? 'text-green-800' : 'text-red-800'
+                <View className={`px-2 py-1 rounded-full ${item.status === 'preparing' ? 'bg-yellow-100' :
+                        item.status === 'ready' ? 'bg-blue-100' :
+                            item.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
                     }`}>
+                    <Text className={`text-xs font-medium ${item.status === 'preparing' ? 'text-yellow-800' :
+                            item.status === 'ready' ? 'text-blue-800' :
+                                item.status === 'completed' ? 'text-green-800' : 'text-red-800'
+                        }`}>
                         {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                     </Text>
                 </View>
@@ -174,7 +166,7 @@ const Orders = () => {
             ) : (
                 <ScrollView
                     refreshControl={
-                        <RefreshControl 
+                        <RefreshControl
                             refreshing={refreshing}
                             onRefresh={loadOrders}
                             colors={['#16a34a']}
@@ -186,7 +178,7 @@ const Orders = () => {
                     ]}
                 >
                     {currentData.length > 0 ? (
-                        currentData.map(item => OrderCard({...item, vendorName: item.vendor}))
+                        currentData.map(item => OrderCard({ ...item, vendorName: item.vendor }))
                     ) : (
                         <View className="flex-1 items-center justify-center">
                             <FontAwesome name="shopping-bag" size={48} color="#d1d5db" />

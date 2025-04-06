@@ -6,12 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import useOrderStore from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
 import { VendorType } from '@/store/cartStore';
-
-const VENDOR_NAMES: Record<VendorType, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VENDOR_NAMES } from '@/constants/types';
 
 const ActiveOrder = () => {
     const { orderId } = useLocalSearchParams<{ orderId: string }>();
@@ -23,7 +18,6 @@ const ActiveOrder = () => {
 
     useEffect(() => {
         fetchOrderStatus();
-        // Remove interval tracking
     }, [orderId]);
 
     const fetchOrderStatus = async () => {

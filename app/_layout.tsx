@@ -7,7 +7,8 @@ import 'react-native-reanimated'
 import "@/global.css"
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import CartSummary from '@/components/Cart'
 
 SplashScreen.preventAutoHideAsync();
 

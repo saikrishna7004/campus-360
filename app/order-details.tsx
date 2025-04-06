@@ -6,15 +6,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import useOrderStore, { Order } from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
-import OrderStatusTracker from '@/components/OrderStatusTracker';
 import * as NavigationBar from 'expo-navigation-bar';
 import { VendorType } from '@/store/cartStore';
-
-const VENDOR_NAMES: Record<VendorType, string> = {
-    'canteen': 'Canteen',
-    'stationery': 'Stationery Store',
-    'default': 'Campus Store'
-};
+import { VENDOR_NAMES } from '@/constants/types';
 
 const OrderDetails = () => {
     const { orderId } = useLocalSearchParams<{ orderId: string }>();
@@ -75,7 +69,7 @@ const OrderDetails = () => {
         return (
             <SafeAreaView className="flex-1 bg-white items-center justify-center">
                 <Text className="text-red-500">Order not found</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     className="mt-4 bg-green-700 px-4 py-2 rounded-md"
                     onPress={() => router.back()}
                 >
@@ -101,15 +95,15 @@ const OrderDetails = () => {
     return (
         <SafeAreaView className="flex-1 bg-gray-100">
             <StatusBar style="dark" />
-            
+
             <View className="bg-white p-4 flex-row items-center">
                 <TouchableOpacity onPress={() => router.back()}>
                     <FontAwesome name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <Text className="ml-4 text-xl font-bold">Order Details</Text>
             </View>
-            
-            <ScrollView 
+
+            <ScrollView
                 className="flex-1"
                 refreshControl={
                     <RefreshControl
@@ -125,24 +119,22 @@ const OrderDetails = () => {
                         <Text className="font-bold text-lg">
                             {VENDOR_NAMES[order.vendor as VendorType]}
                         </Text>
-                        <View className={`px-2 py-1 rounded-full ${
-                            order.status === 'preparing' ? 'bg-yellow-100' : 
-                            order.status === 'ready' ? 'bg-blue-100' :
-                            order.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
-                        }`}>
-                            <Text className={`text-xs font-medium ${
-                                order.status === 'preparing' ? 'text-yellow-800' : 
-                                order.status === 'ready' ? 'text-blue-800' :
-                                order.status === 'completed' ? 'text-green-800' : 'text-red-800'
+                        <View className={`px-2 py-1 rounded-full ${order.status === 'preparing' ? 'bg-yellow-100' :
+                                order.status === 'ready' ? 'bg-blue-100' :
+                                    order.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
                             }`}>
+                            <Text className={`text-xs font-medium ${order.status === 'preparing' ? 'text-yellow-800' :
+                                    order.status === 'ready' ? 'text-blue-800' :
+                                        order.status === 'completed' ? 'text-green-800' : 'text-red-800'
+                                }`}>
                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </Text>
                         </View>
                     </View>
-                    
+
                     <Text className="text-gray-600 mb-1">Order #{order.orderId}</Text>
                     <Text className="text-gray-600 mb-3">{formatDate(order.createdAt)}</Text>
-                    
+
                     <View className="border-t border-gray-200 pt-3 mb-3">
                         <Text className="font-medium mb-2">Payment Information</Text>
                         <View className="flex-row justify-between mb-1">
@@ -155,10 +147,10 @@ const OrderDetails = () => {
                         </View>
                     </View>
                 </View>
-                
+
                 <View className="bg-white p-4 mb-4">
                     <Text className="font-medium mb-3">Order Items</Text>
-                    
+
                     {order.items.map((item, index) => (
                         <View key={index} className="flex-row justify-between mb-3">
                             <View className="flex-row">
@@ -170,7 +162,7 @@ const OrderDetails = () => {
                             <Text className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</Text>
                         </View>
                     ))}
-                    
+
                     <View className="border-t border-gray-200 mt-2 pt-3">
                         <View className="flex-row justify-between mb-2">
                             <Text className="text-gray-600">Subtotal</Text>
@@ -186,7 +178,7 @@ const OrderDetails = () => {
                         </View>
                     </View>
                 </View>
-                
+
                 {order.status === 'completed' && (
                     <View className="bg-green-50 p-4 mb-4 mx-4 rounded-lg">
                         <View className="flex-row items-center">
@@ -198,7 +190,7 @@ const OrderDetails = () => {
                         </Text>
                     </View>
                 )}
-                
+
                 {order.status === 'cancelled' && (
                     <View className="bg-red-50 p-4 mb-4 mx-4 rounded-lg">
                         <View className="flex-row items-center">
@@ -207,8 +199,8 @@ const OrderDetails = () => {
                         </View>
                     </View>
                 )}
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                     className="mx-4 mb-8 bg-white p-4 rounded-lg border border-gray-200"
                     onPress={() => {
                         router.push('/');
