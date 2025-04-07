@@ -98,7 +98,9 @@ const useOrderStore = create<OrderStore>((set, get) => ({
             }));
             
             set({ 
-                orderHistory: orders,
+                orderHistory: orders.filter(
+                    (order: Order) => order.status === 'completed' || order.status === 'cancelled'
+                ),
                 activeOrders: orders.filter(
                     (order: Order) => order.status === 'preparing' || order.status === 'ready'
                 ),
