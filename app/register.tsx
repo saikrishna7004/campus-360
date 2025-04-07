@@ -58,7 +58,7 @@ const Register = () => {
                             <Text className="text-2xl font-bold text-green-800">Create Account</Text>
                         </View>
 
-                        <View className="space-y-4">
+                        <View className="gap-4">
                             <View>
                                 <Text className="text-gray-700 mb-2 ml-1">Full Name</Text>
                                 <TextInput
