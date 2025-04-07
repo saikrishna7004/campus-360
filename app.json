@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/splash-icon.png",
         "backgroundColor": "#000"
-      }
+      },
+      "package": "com.saikrishna7004.campus360"
     },
     "web": {
       "bundler": "metro",
@@ -37,14 +38,14 @@
         "expo-font",
         {
           "fonts": [
-            "@/fonts/metropolis/Metropolis-Regular.otf",
-            "@/fonts/metropolis/Metropolis-Bold.otf",
-            "@/fonts/metropolis/Metropolis-ExtraBold.otf",
-            "@/fonts/metropolis/Metropolis-SemiBold.otf",
-            "@/fonts/metropolis/Metropolis-Medium.otf",
-            "@/fonts/metropolis/Metropolis-Light.otf",
-            "@/fonts/metropolis/Metropolis-Thin.otf",
-            "@/fonts/metropolis/Metropolis-Black.otf"
+            "./fonts/metropolis/Metropolis-Regular.otf",
+            "./fonts/metropolis/Metropolis-Bold.otf",
+            "./fonts/metropolis/Metropolis-ExtraBold.otf",
+            "./fonts/metropolis/Metropolis-SemiBold.otf",
+            "./fonts/metropolis/Metropolis-Medium.otf",
+            "./fonts/metropolis/Metropolis-Light.otf",
+            "./fonts/metropolis/Metropolis-Thin.otf",
+            "./fonts/metropolis/Metropolis-Black.otf"
           ]
         }
       ],
