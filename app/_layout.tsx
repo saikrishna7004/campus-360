@@ -55,6 +55,7 @@ export default function RootLayout() {
                         <Stack.Screen name="profile" options={{ headerTitle: "Profile", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                         <Stack.Screen name="cart" options={{ headerShown: true }} />
+                        <Stack.Screen name="order-confirmation" options={{ headerTitle: "Order Confirmation", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
                         <Stack.Screen name="not-found" />
                         <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
                     </Stack>

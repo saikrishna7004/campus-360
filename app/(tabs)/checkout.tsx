@@ -65,6 +65,12 @@ const CheckoutPage = () => {
         }
     }, [vendor]);
 
+    useEffect(() => {
+        if (!carts?.length) {
+            router.replace('/');
+        }
+    }, [carts]);
+
     const handlePlaceOrder = async () => {
         if (carts.length === 0) {
             Alert.alert('Error', 'Your cart is empty!')
@@ -205,9 +211,6 @@ const CheckoutPage = () => {
     };
 
     if (!carts?.length) {
-        useEffect(() => {
-            router.replace('/');
-        }, []);
         return null;
     }
 

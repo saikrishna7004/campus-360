@@ -27,7 +27,7 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
                         order.status === 'ready' ? 'text-blue-800' :
                             order.status === 'completed' ? 'text-green-800' : 'text-red-800'
                         }`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
                     </Text>
                 </View>
             </View>
@@ -38,12 +38,12 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
             </View>
 
             <View className="mt-2">
-                {order.items.slice(0, 2).map((orderItem: OrderItem, index: number) => (
+                {order.items?.slice(0, 2).map((orderItem: OrderItem, index: number) => (
                     <Text key={index} className="text-gray-700">
                         {orderItem.quantity}x {orderItem.name}
                     </Text>
                 ))}
-                {order.items.length > 2 && (
+                {order.items && order.items.length > 2 && (
                     <Text className="text-gray-500">+{order.items.length - 2} more items</Text>
                 )}
             </View>
@@ -113,7 +113,7 @@ const MyOrders = () => {
     };
 
     const renderItem = ({ item }: { item: Order }) => (
-        <OrderCard order={item} onPress={() => navigateToOrderDetails(item)} />
+        <OrderCard order={{ ...item, items: item.items || [] }} onPress={() => navigateToOrderDetails(item)} />
     );
 
     const EmptyState = () => (

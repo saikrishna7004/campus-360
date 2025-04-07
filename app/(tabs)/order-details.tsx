@@ -96,13 +96,6 @@ const OrderDetails = () => {
         <SafeAreaView className="flex-1 bg-gray-100">
             <StatusBar style="dark" />
 
-            <View className="bg-white p-4 flex-row items-center">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <FontAwesome name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text className="ml-4 text-xl font-bold">Order Details</Text>
-            </View>
-
             <ScrollView
                 className="flex-1"
                 refreshControl={
@@ -127,7 +120,7 @@ const OrderDetails = () => {
                                     order.status === 'ready' ? 'text-blue-800' :
                                         order.status === 'completed' ? 'text-green-800' : 'text-red-800'
                                 }`}>
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                {order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}
                             </Text>
                         </View>
                     </View>

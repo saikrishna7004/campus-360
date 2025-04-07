@@ -40,7 +40,7 @@ const CheckoutSuccess = () => {
                         You can track the status of your {orderIdArray.length > 1 ? 'orders' : 'order'} from the My Orders section.
                     </Text>
                     
-                    <View className="w-full space-y-3">
+                    <View className="w-full gap-3">
                         <TouchableOpacity 
                             className="bg-green-700 py-3 rounded-lg items-center"
                             onPress={() => router.replace('/my-orders')}
