@@ -40,7 +40,7 @@ const Home = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top', 'left', 'right']}>
-            <StatusBar barStyle="dark-content" backgroundColor="white" />
+            <StatusBar barStyle="default" />
 
             <View className="flex-row align-items-center p-4" style={styles.header}>
                 <TouchableOpacity onPress={openSidebar}>
