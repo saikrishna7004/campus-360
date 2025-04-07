@@ -11,7 +11,7 @@ import { VENDOR_NAMES } from '@/constants/types';
 
 const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) => {
     const formattedDate = new Date(order.createdAt).toLocaleString();
-    const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = order?.items?.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
         <TouchableOpacity
@@ -129,9 +129,6 @@ const MyOrders = () => {
     if (loading && !refreshing) {
         return (
             <SafeAreaView className="flex-1 bg-white">
-                <View className="p-4 bg-white">
-                    <Text className="text-2xl font-bold">My Orders</Text>
-                </View>
                 <View className="flex-1 items-center justify-center">
                     <ActivityIndicator size="large" color="#16a34a" />
                     <Text className="mt-4 text-gray-500">Loading orders...</Text>
@@ -143,16 +140,9 @@ const MyOrders = () => {
     const orders = activeTab === 'active' ? (activeOrders || []) : (orderHistory || []);
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
+        <SafeAreaView className="flex-1 bg-gray-100" style={{ paddingTop: -28 }}>
             <StatusBar style="dark" />
-
-            <View className="bg-white p-4 flex-row items-center">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <FontAwesome name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
-                <Text className="ml-4 text-xl font-bold">My Orders</Text>
-            </View>
-
+            
             <View className="flex-row bg-white mb-4 p-2">
                 <TouchableOpacity
                     className={`flex-1 py-2 items-center rounded-md ${activeTab === 'active' ? 'bg-green-50' : ''}`}
