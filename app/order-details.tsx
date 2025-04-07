@@ -152,8 +152,8 @@ const OrderDetails = () => {
                     <Text className="font-medium mb-3">Order Items</Text>
 
                     {order.items.map((item, index) => (
-                        <View key={index} className="flex-row justify-between mb-3">
-                            <View className="flex-row">
+                        <View key={index} className="flex-row justify-between mb-3 items-center align-center">
+                            <View className="flex-row items-center align-center">
                                 <View className="h-6 w-6 bg-green-100 rounded-full items-center justify-center mr-2">
                                     <Text className="text-green-800 text-xs">{item.quantity}x</Text>
                                 </View>
