@@ -45,7 +45,7 @@ const VendorLayout = () => {
             >
                 <Stack.Screen name="index" options={{ title: 'Vendor Dashboard', headerTitleAlign: 'center' }} />
                 <Stack.Screen name="inventory" options={{ title: 'Inventory Management', headerTitleAlign: 'center' }} />
-                <Stack.Screen name="orders" options={{ title: 'Orders', headerTitleAlign: 'center' }} />
+                <Stack.Screen name="my-orders" options={{ title: 'Orders', headerTitleAlign: 'center' }} />
                 <Stack.Screen name="sales" options={{ title: 'Sales Analytics', headerTitleAlign: 'center' }} />
                 <Stack.Screen name="profile" options={{ title: 'Vendor Profile', headerTitleAlign: 'center' }} />
             </Stack>

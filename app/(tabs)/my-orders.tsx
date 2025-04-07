@@ -4,14 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import useOrderStore, { Order } from '@/store/orderStore';
+import useOrderStore, { Order, OrderItem } from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
 import * as NavigationBar from 'expo-navigation-bar';
 import { VENDOR_NAMES } from '@/constants/types';
 
 const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) => {
     const formattedDate = new Date(order.createdAt).toLocaleString();
-    const totalItems = order?.items?.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
         <TouchableOpacity
@@ -21,12 +20,12 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
             <View className="flex-row justify-between items-center mb-2">
                 <Text className="font-bold text-lg">{VENDOR_NAMES[order.vendor]}</Text>
                 <View className={`px-2 py-1 rounded-full ${order.status === 'preparing' ? 'bg-yellow-100' :
-                        order.status === 'ready' ? 'bg-blue-100' :
-                            order.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
+                    order.status === 'ready' ? 'bg-blue-100' :
+                        order.status === 'completed' ? 'bg-green-100' : 'bg-red-100'
                     }`}>
                     <Text className={`text-xs font-medium ${order.status === 'preparing' ? 'text-yellow-800' :
-                            order.status === 'ready' ? 'text-blue-800' :
-                                order.status === 'completed' ? 'text-green-800' : 'text-red-800'
+                        order.status === 'ready' ? 'text-blue-800' :
+                            order.status === 'completed' ? 'text-green-800' : 'text-red-800'
                         }`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </Text>
@@ -38,14 +37,23 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
                 <Text className="text-gray-600">{formattedDate}</Text>
             </View>
 
-            <View className="flex-row justify-between">
-                <Text className="text-gray-700">{totalItems} items</Text>
-                <Text className="font-semibold">₹{order.totalAmount.toFixed(2)}</Text>
+            <View className="mt-2">
+                {order.items.slice(0, 2).map((orderItem: OrderItem, index: number) => (
+                    <Text key={index} className="text-gray-700">
+                        {orderItem.quantity}x {orderItem.name}
+                    </Text>
+                ))}
+                {order.items.length > 2 && (
+                    <Text className="text-gray-500">+{order.items.length - 2} more items</Text>
+                )}
             </View>
 
-            <View className="mt-2 flex-row items-center">
-                <FontAwesome name="arrow-right" size={14} color="#16a34a" />
-                <Text className="text-green-700 ml-1 text-sm">View Details</Text>
+            <View className="flex-row justify-between items-center mt-3">
+                <Text className="font-bold">₹{order.totalAmount.toFixed(2)}</Text>
+                <View className="flex-row items-center">
+                    <Text className="text-green-700 mr-1">View Details</Text>
+                    <FontAwesome name="chevron-right" size={12} color="#15803d" />
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -142,7 +150,7 @@ const MyOrders = () => {
     return (
         <SafeAreaView className="flex-1 bg-gray-100" style={{ paddingTop: -28 }}>
             <StatusBar style="dark" />
-            
+
             <View className="flex-row bg-white mb-4 p-2">
                 <TouchableOpacity
                     className={`flex-1 py-2 items-center rounded-md ${activeTab === 'active' ? 'bg-green-50' : ''}`}

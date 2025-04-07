@@ -52,12 +52,12 @@ const Stationery: React.FC = () => {
     const categories = ['Stationery']
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: -28 }}>
             <ScrollView
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#000" colors={['#00f']} />
                 }
-                contentContainerStyle={{ paddingBottom: 100 }}
+                contentContainerStyle={{ paddingBottom: 100, paddingTop: 20 }}
             >
                 <View className="flex flex-row me-2">
                     <View className="w-[80%]">

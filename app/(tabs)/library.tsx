@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl, Linking } from 'react-native';
+import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl, Linking, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -13,7 +13,8 @@ type Book = {
     image: string;
     available: boolean;
     count: number;
-    requestDate?: Date;
+    borrowedDate?: Date;
+    returnDate?: Date;
     deadline?: Date;
     pdfUrl?: string;
 };
@@ -24,6 +25,7 @@ const Library = () => {
     const [userBooks, setUserBooks] = useState<Book[]>([]);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(true);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '75%'], []);
 
@@ -40,13 +42,34 @@ const Library = () => {
         }
     };
 
+    const fetchUserBooks = async () => {
+        try {
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/books/borrowed`, { headers: getAuthHeader() });
+            setUserBooks(response.data);
+        } catch (err) {
+            console.error('Error fetching user books:', err);
+        }
+    };
+
     useEffect(() => {
-        fetchBooks();
+        const loadData = async () => {
+            setLoading(true);
+            await fetchBooks();
+            await fetchUserBooks();
+            setLoading(false);
+        };
+        loadData();
     }, []);
 
     const borrowBook = async (book: Book) => {
         if (userBooks.length >= 2) {
             Alert.alert('Error', 'You can only hold 2 books at a time.');
+            return;
+        }
+
+        const alreadyBorrowed = userBooks.find((borrowedBook) => borrowedBook._id === book._id);
+        if (alreadyBorrowed) {
+            Alert.alert('Error', 'You have already borrowed this book.');
             return;
         }
 
@@ -87,62 +110,70 @@ const Library = () => {
     const onRefresh = async () => {
         setRefreshing(true);
         await fetchBooks();
+        await fetchUserBooks();
         setRefreshing(false);
     };
 
     return (
         <SafeAreaView className="flex-1 bg-white">
-            <ScrollView
-                contentContainerStyle={{ paddingBottom: 40 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            >
-                <View className="px-4">
-                    <Text className="text-2xl font-bold mb-4 text-black">Library</Text>
-
-                    <Text className="text-xl font-bold mb-2 text-black">Books I'm Holding:</Text>
-                    <View className="mb-4">
-                        {userBooks.length === 0 ? (
-                            <Text className="text-lg text-gray-600">None</Text>
-                        ) : (
-                            userBooks.map((item) => (
-                                <View key={item._id} className="flex flex-row mb-4 border border-gray-300 rounded-lg bg-gray-100">
-                                    <View className="">
-                                        <Image source={{ uri: item.image }} style={{height: 100, width: 75}} className="rounded-lg" />
-                                    </View>
-                                    <View className="justify-center ml-4 mb-1">
-                                        <Text className="text-lg font-semibold text-black">{item.title}</Text>
-                                        <Text className="text-sm text-gray-600">by {item.author}</Text>
-                                        <Text className="text-sm text-gray-600">Deadline: {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'N/A'}</Text>
-                                    </View>
-                                </View>
-                            ))
-                        )}
-                    </View>
-
-                    <Text className="text-xl font-bold mb-2 text-black">Available Books:</Text>
-                    <View className="flex flex-wrap flex-row justify-between">
-                        {books.map((item) => (
-                            <View key={item._id} className="w-1/2 p-2">
-                                <View className="border border-gray-300 rounded-lg bg-gray-50">
-                                    <View className="object-contain">
-                                        <Image source={{ uri: item.image }} className="h-40 rounded-lg" />
-                                    </View>
-                                    <View className="px-3">
-                                        <Text className="text-[14px] font-semibold text-black mt-2">{item.title}</Text>
-                                        <TouchableOpacity
-                                            onPress={() => openModal(item)}
-                                            className="flex flex-row py-2"
-                                        >
-                                            <Text className="text-green-700 font-semibold">Details</Text>
-                                            <MaterialCommunityIcons name="chevron-right" size={24} color="green" />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
+            {loading ? (
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color="#0000ff" />
                 </View>
-            </ScrollView>
+            ) : (
+                <ScrollView
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                >
+                    <View className="px-4">
+                        <Text className="text-2xl font-bold mb-4 text-black">Library</Text>
+
+                        <Text className="text-xl font-bold mb-2 text-black">Books I'm Holding:</Text>
+                        <View className="mb-4">
+                            {userBooks.length === 0 ? (
+                                <Text className="text-lg text-gray-600">None</Text>
+                            ) : (
+                                userBooks.map((item) => (
+                                    <View key={item._id} className="flex flex-row mb-4 border border-gray-300 rounded-lg bg-gray-100">
+                                        <View className="object-contain h-25 w-20 rounded-lg">
+                                            <Image source={{ uri: item.image }} style={{ height: 100, width: 75 }} className="rounded-lg" />
+                                        </View>
+                                        <View className="justify-center ml-1 mb-1" style={{ flex: 1 }}>
+                                            <Text className="text-lg font-semibold text-black" numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
+                                            <Text className="text-sm text-gray-600" numberOfLines={1} ellipsizeMode="tail">by {item.author}</Text>
+                                            <Text className="text-sm text-gray-600">Date Issued: {item.borrowedDate ? new Date(item.borrowedDate).toLocaleDateString() : 'N/A'}</Text>
+                                            <Text className="text-sm text-gray-600">Deadline: {item.deadline ? new Date(item.deadline).toLocaleDateString() : 'N/A'}</Text>
+                                        </View>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+
+                        <Text className="text-xl font-bold mb-2 text-black">Available Books:</Text>
+                        <View className="flex flex-wrap flex-row justify-between">
+                            {books.map((item) => (
+                                <View key={item._id} className="w-1/2 p-2">
+                                    <View className="border border-gray-300 rounded-lg bg-gray-50">
+                                        <TouchableOpacity onPress={() => openModal(item)} className="object-contain">
+                                            <Image source={{ uri: item.image }} className="h-40 rounded-lg" />
+                                        </TouchableOpacity>
+                                        <View className="px-3">
+                                            <Text className="text-[14px] font-semibold text-black mt-2">{item.title}</Text>
+                                            <TouchableOpacity
+                                                onPress={() => openModal(item)}
+                                                className="flex flex-row py-2"
+                                            >
+                                                <Text className="text-green-700 font-semibold">Details</Text>
+                                                <MaterialCommunityIcons name="chevron-right" size={24} color="green" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                </ScrollView>
+            )}
 
             <BottomSheet
                 ref={bottomSheetRef}
