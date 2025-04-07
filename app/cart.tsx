@@ -10,6 +10,7 @@ import CartProduct from '@/components/CartProduct'
 import * as NavigationBar from 'expo-navigation-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { VENDOR_NAMES } from '@/constants/types'
+import CancellationPolicy from '@/components/CancellationPolicy'
 
 const Cart = () => {
     const params = useLocalSearchParams();
@@ -200,10 +201,7 @@ const Cart = () => {
                         <Text className="font-medium text-gray-800">₹{(totalPrice + 2).toFixed(2)}</Text>
                     </View>
                 </View>
-                <View className='p-4 gap-1'>
-                    <Text className="tracking-[2px] font-medium text-slate-500">CANCELLATION POLICY</Text>
-                    <Text className="tracking-wide text-xs text-slate-500">To fairly compensate our vendors, we request you to cancel your order within 30 seconds of placing it. After that, you will be charged 50% of the total amount.</Text>
-                </View>
+                <CancellationPolicy />
             </ScrollView>
             <View className="absolute bottom-0 left-0 right-0 pt-4 pb-2 px-2 rounded-t-xl bg-white" style={{ boxShadow: '0px 0px 10px #0a0a0a2e' }}>
                 <View className="flex-row justify-between items-center mb-2">

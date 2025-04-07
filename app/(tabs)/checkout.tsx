@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { VENDOR_NAMES } from '@/constants/types';
 import CartProduct from '@/components/CartProduct';
 import Product from '@/components/Product';
+import CancellationPolicy from '@/components/CancellationPolicy';
 
 const CheckoutPage = () => {
     const router = useRouter();
@@ -127,15 +128,23 @@ const CheckoutPage = () => {
     }
 
     const onRefresh = async () => {
-        setRefreshing(true)
-        if (isAuthenticated) {
-            try {
-                await fetchCartFromCloud(getAuthHeader());
-            } catch (error) {
-                console.error('Failed to refresh cart:', error);
+        setRefreshing(true);
+        try {
+            if (isAuthenticated) {
+                const authHeader = getAuthHeader();
+                if (!authHeader) {
+                    throw new Error('Authentication required');
+                }
+                await fetchCartFromCloud(authHeader);
+            } else {
+                router.replace('/login');
             }
+        } catch (error) {
+            console.error('Failed to refresh cart:', error);
+            Alert.alert('Error', 'Failed to refresh cart. Please try again.');
+        } finally {
+            setRefreshing(false);
         }
-        setRefreshing(false)
     }
 
     NavigationBar.setButtonStyleAsync("dark");
@@ -215,10 +224,20 @@ const CheckoutPage = () => {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
+        <SafeAreaView className="flex-1 bg-gray-100" style={{ paddingTop: -28 }}>
             <StatusBar style="dark" />
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 200, paddingTop: 20 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#16a34a']}
+                        tintColor="#16a34a"
+                    />
+                }
+            >
                 <View className="bg-white mx-4 mb-2 p-4 rounded-xl">
                     <Text className="text-green-600 font-medium">Orders to be picked separately.</Text>
                 </View>
@@ -271,22 +290,22 @@ const CheckoutPage = () => {
                     );
                 })}
 
-                <View className="bg-white mx-4 my-2 p-4 rounded-xl mb-8">
-                    <View className="flex-row justify-between mb-2">
-                        <Text className="text-gray-700">Items Total</Text>
-                        <Text className="font-medium">₹{totalAmount.toFixed(2)}</Text>
+                <View className="flex flex-row mx-4 my-2 bg-white rounded-2xl p-4">
+                    <View className="flex flex-row justify-between items-center mb-4">
+                        <FontAwesome name='clock-o' size={24} color='green' />
                     </View>
-                    <View className="flex-row justify-between mb-2">
-                        <Text className="text-gray-700">Platform Fees</Text>
-                        <Text className="font-medium">₹{platformFee.toFixed(2)}</Text>
-                    </View>
-                    <View className="flex-row justify-between mt-2">
-                        <Text className="font-bold text-lg">Total Amount</Text>
-                        <Text className="font-bold text-lg">₹{finalTotal.toFixed(2)}</Text>
+                    <View>
+                        <View className="flex flex-row items-center px-4">
+                            <Text className="font-medium text-gray-800 me-1">Pick up in</Text>
+                            <Text className="font-bold text-gray-800">10 minutes</Text>
+                        </View>
+                        <View className="flex flex-row justify-between items-center px-4 mt-1">
+                            <Text className="text-xs text-gray-800">(Time is approximated)</Text>
+                        </View>
                     </View>
                 </View>
 
-                <View className="flex mx-3 bg-white rounded-2xl py-4">
+                <View className="flex mx-3 bg-white rounded-2xl py-4 my-2">
                     <View className="flex flex-row justify-between items-center px-4 mb-4">
                         <Text className="text-gray-800">Subtotal</Text>
                         <Text className="font-medium text-gray-800">₹{totalAmount.toFixed(2)}</Text>
@@ -304,17 +323,7 @@ const CheckoutPage = () => {
                         <Text className="font-medium text-gray-800">₹{finalTotal.toFixed(2)}</Text>
                     </View>
                 </View>
-                <View className='p-4 gap-1'>
-                    <Text className="tracking-[2px] font-medium text-slate-500">CANCELLATION POLICY</Text>
-                    <Text className="tracking-wide text-xs text-slate-500">To fairly compensate our vendors, we request you to cancel your order within 30 seconds of placing it. After that, you will be charged 50% of the total amount.</Text>
-                </View>
-
-                <View className="mx-4 mb-4">
-                    <Text className="tracking-[2px] font-medium text-slate-500 mb-1">CANCELLATION POLICY</Text>
-                    <Text className="tracking-wide text-xs text-slate-500">
-                        To fairly compensate our vendors, we request you to cancel your order within 30 seconds of placing it. After that, you will be charged 50% of the total amount.
-                    </Text>
-                </View>
+                <CancellationPolicy />
             </ScrollView>
             <View className="absolute bottom-0 left-0 right-0 pt-4 pb-2 px-2 rounded-t-xl bg-white" style={{ boxShadow: '0px 0px 10px #0a0a0a2e' }}>
                 <View className="flex-row justify-between items-center mb-2">

@@ -49,7 +49,7 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
             </View>
 
             <View className="flex-row justify-between items-center mt-3">
-                <Text className="font-bold">₹{order.totalAmount.toFixed(2)}</Text>
+                <Text className="font-bold">₹{order.totalAmount?.toFixed(2)}</Text>
                 <View className="flex-row items-center">
                     <Text className="text-green-700 mr-1">View Details</Text>
                     <FontAwesome name="chevron-right" size={12} color="#15803d" />
