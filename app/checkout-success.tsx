@@ -29,7 +29,7 @@ const CheckoutSuccess = () => {
                         <View className="bg-white p-4 rounded-xl w-full mb-6">
                             <Text className="font-bold mb-2">Order {orderIdArray.length > 1 ? 'IDs' : 'ID'}:</Text>
                             {orderIdArray.map((id, index) => (
-                                <Text key={id} className="text-gray-600 mb-1">
+                                <Text key={id + index} className="text-gray-600 mb-1">
                                     {index + 1}. {id}
                                 </Text>
                             ))}

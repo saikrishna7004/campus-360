@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
@@ -112,10 +112,6 @@ const MyOrders = () => {
         });
     };
 
-    const renderItem = ({ item }: { item: Order }) => (
-        <OrderCard order={{ ...item, items: item.items || [] }} onPress={() => navigateToOrderDetails(item)} />
-    );
-
     const EmptyState = () => (
         <View className="flex-1 items-center justify-center py-8">
             <FontAwesome name="shopping-bag" size={64} color="#d1d5db" />
@@ -182,10 +178,7 @@ const MyOrders = () => {
                     </TouchableOpacity>
                 </View>
             ) : (
-                <FlatList
-                    data={orders}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item._id}
+                <ScrollView
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingTop: 8,
@@ -200,8 +193,19 @@ const MyOrders = () => {
                             tintColor="#16a34a"
                         />
                     }
-                    ListEmptyComponent={<EmptyState />}
-                />
+                >
+                    {orders.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        orders.map((order) => (
+                            <OrderCard
+                                key={order._id}
+                                order={{ ...order, items: order.items || [] }}
+                                onPress={() => navigateToOrderDetails(order)}
+                            />
+                        ))
+                    )}
+                </ScrollView>
             )}
         </SafeAreaView>
     );
