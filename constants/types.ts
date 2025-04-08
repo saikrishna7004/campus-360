@@ -45,7 +45,7 @@ export const vendorOptions: Record<string, HomeMenuOptions> = {
         name: 'Vendor',
         icon: 'https://cdn-icons-png.flaticon.com/512/4990/4990829.png',
         color: '#1E3A8A',
-        url: '/vendor',
+        url: '/admin/dashboard',
     }
 };
 export const adminOptions: Record<string, HomeMenuOptions> = {
@@ -53,6 +53,6 @@ export const adminOptions: Record<string, HomeMenuOptions> = {
         name: 'Admin',
         icon: 'https://cdn-icons-png.flaticon.com/512/8644/8644456.png',
         color: '#1E3A8A',
-        url: '/vendor',
+        url: '/admin/dashboard',
     }
 }; 

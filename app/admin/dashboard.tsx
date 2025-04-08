@@ -30,31 +30,24 @@ const colors = {
     orange: '#F97316',
 };
 
-const StatsCard = ({ title, value, bgColor, textColor,}: { title: string; value: number | string;bgColor: string; textColor: string; }) => (
-    <View
+const StatsCard = ({ title, value, bgColor, textColor, }: { title: string; value: number | string; bgColor: string; textColor: string; }) => (
+    <View className="p-4 rounded-lg mb-4"
         style={{
             backgroundColor: bgColor,
-            padding: 16,
-            borderRadius: 8,
-            marginBottom: 16,
-            marginRight: 16,
-            width: '48%',
         }}
     >
-        <Text style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>{title}</Text>
-        <Text style={{ color: textColor, fontSize: 24, fontWeight: 'bold' }}>{value}</Text>
+        <Text className="font-semibold text-lg mb-2" style={{ color: textColor }}>{title}</Text>
+        <Text className="font-bold text-2xl" style={{ color: textColor }}>{value}</Text>
     </View>
 );
 
 const ChartCard = () => (
-    <View
+    <View className="mb-12 rounded-lg p-4"
         style={{
-            marginBottom: 16,
             backgroundColor: colors.blue,
-            borderRadius: 8,
         }}
     >
-        <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Sales Over Time</Text>
+        <Text className="text-white font-semibold text-lg mb-4">Sales Over Time</Text>
         <LineChart
             data={{
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -64,7 +57,7 @@ const ChartCard = () => (
                     },
                 ],
             }}
-            width={Dimensions.get('window').width - 100}
+            width={Dimensions.get('window').width - 70}
             height={220}
             chartConfig={{
                 backgroundColor: colors.blue,
@@ -154,28 +147,32 @@ const Dashboard = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: -28 }}>
-            <ScrollView
-                style={{ padding: 16 }}
+            <ScrollView className="px-4 pt-4"
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
-                <View className="flex flex-row justify-between items-center mb-4 rounded-lg bg-white shadow-md p-4"
+                <View className="flex mb-4 rounded-lg bg-white shadow-md p-4"
                     style={{
                         backgroundColor: colors.orange,
                     }}
                 >
-                    <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Top Products</Text>
+                    <Text className="text-white font-semibold text-lg mb-2">Top Products</Text>
                     {analytics.topProducts.length === 0 ? (
                         <Text style={{ color: 'white' }}>No products available</Text>
                     ) : (
                         analytics.topProducts.map((product, index) => (
-                            <Text key={index} style={{ color: 'white' }}>
-                                {index + 1}. {product._id} - {formatCurrency(product.sales)}
-                            </Text>
+                            <View key={index} className="flex-row justify-between">
+                                <Text className="text-white flex-1 mr-2" numberOfLines={1}>
+                                    {index + 1}. {product._id}
+                                </Text>
+                                <Text className="text-white">
+                                    {formatCurrency(product.sales)}
+                                </Text>
+                            </View>
                         ))
                     )}
                 </View>
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                <View className="grid grid-cols-2 gap-x-2 justify-center">
                     {statsData.map((stat, index) => (
                         <StatsCard
                             key={index}

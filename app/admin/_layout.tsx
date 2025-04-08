@@ -5,6 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Audio } from 'expo-av';
 import Orders from './orders';
 import Menu from './menu';
+import Dashboard from './dashboard';
+import OrderHistory from './orderHistory';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useOrderStore from '@/store/orderStore';
 import useAuthStore, { User } from '@/store/authStore';
@@ -122,11 +124,25 @@ const AdminLayout = () => {
                 })}
             >
                 <Tab.Screen
+                    name="Dashboard"
+                    component={Dashboard}
+                    options={{
+                        tabBarIcon: ({ color, size }: { color: string; size: number }) => <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />,
+                    }}
+                />
+                <Tab.Screen
                     name="Orders"
                     component={Orders}
                     options={{
                         tabBarIcon: ({ color, size }: { color: string; size: number }) => <MaterialCommunityIcons name="clipboard-list" color={color} size={size} />,
                         tabBarBadge: preparingOrdersCount > 0 ? preparingOrdersCount : undefined,
+                    }}
+                />
+                <Tab.Screen
+                    name="Order History"
+                    component={OrderHistory}
+                    options={{
+                        tabBarIcon: ({ color, size }: { color: string; size: number }) => <MaterialCommunityIcons name="history" color={color} size={size} />,
                     }}
                 />
                 <Tab.Screen
