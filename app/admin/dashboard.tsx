@@ -14,7 +14,16 @@ type AnalyticsData = {
     totalWeek: number;
     totalMonth: number;
     uniqueItemsSold: number;
-    topProducts: { _id: string; sales: number }[];
+    topProducts: {
+        _id: string;
+        sales: number;
+        quantity: number;
+        price: number;
+    }[];
+    monthlySales: {
+        label: string;
+        value: number;
+    }[];
 };
 
 const colors = {
@@ -30,32 +39,24 @@ const colors = {
     orange: '#F97316',
 };
 
-const StatsCard = ({ title, value, bgColor, textColor, }: { title: string; value: number | string; bgColor: string; textColor: string; }) => (
-    <View className="p-4 rounded-lg mb-4"
+const StatsCard = ({ title, value, bgColor, textColor }: { title: string; value: number | string; bgColor: string; textColor: string; }) => (
+    <View className="w-[48%] p-4 rounded-lg mb-2"
         style={{
             backgroundColor: bgColor,
         }}
     >
-        <Text className="font-semibold text-lg mb-2" style={{ color: textColor }}>{title}</Text>
-        <Text className="font-bold text-2xl" style={{ color: textColor }}>{value}</Text>
+        <Text style={{ fontWeight: '600', fontSize: 16, marginBottom: 8, color: textColor }}>{title}</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 20, color: textColor }}>{value}</Text>
     </View>
 );
 
-const ChartCard = () => (
-    <View className="mb-12 rounded-lg p-4"
-        style={{
-            backgroundColor: colors.blue,
-        }}
-    >
-        <Text className="text-white font-semibold text-lg mb-4">Sales Over Time</Text>
+const ChartCard = ({ data }: { data: AnalyticsData['monthlySales'] }) => (
+    <View style={{ backgroundColor: colors.blue, borderRadius: 8, padding: 16, marginBottom: 16 }}>
+        <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 8 }}>Sales Over Time</Text>
         <LineChart
             data={{
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [
-                    {
-                        data: [65, 59, 80, 81, 56, 55],
-                    },
-                ],
+                labels: data.map(d => d.label),
+                datasets: [{ data: data.map(d => d.value) }],
             }}
             width={Dimensions.get('window').width - 70}
             height={220}
@@ -63,7 +64,7 @@ const ChartCard = () => (
                 backgroundColor: colors.blue,
                 backgroundGradientFrom: colors.blue,
                 backgroundGradientTo: colors.blue,
-                decimalPlaces: 2,
+                decimalPlaces: 0,
                 color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                 propsForDots: {
@@ -147,32 +148,24 @@ const Dashboard = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white', paddingTop: -28 }}>
-            <ScrollView className="px-4 pt-4"
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            >
-                <View className="flex mb-4 rounded-lg bg-white shadow-md p-4"
-                    style={{
-                        backgroundColor: colors.orange,
-                    }}
-                >
-                    <Text className="text-white font-semibold text-lg mb-2">Top Products</Text>
+            <ScrollView className="p-4" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                <View style={{ backgroundColor: colors.orange, borderRadius: 8, padding: 16, marginBottom: 16 }}>
+                    <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 8 }}>Top Products</Text>
                     {analytics.topProducts.length === 0 ? (
                         <Text style={{ color: 'white' }}>No products available</Text>
                     ) : (
                         analytics.topProducts.map((product, index) => (
-                            <View key={index} className="flex-row justify-between">
-                                <Text className="text-white flex-1 mr-2" numberOfLines={1}>
+                            <View key={index} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+                                <Text style={{ color: 'white' }} numberOfLines={1}>
                                     {index + 1}. {product._id}
                                 </Text>
-                                <Text className="text-white">
-                                    {formatCurrency(product.sales)}
-                                </Text>
+                                <Text style={{ color: 'white' }}>{product.quantity}</Text>
                             </View>
                         ))
                     )}
                 </View>
 
-                <View className="grid grid-cols-2 gap-x-2 justify-center">
+                <View className="flex flex-row flex-wrap justify-between gap-2" style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 }}>
                     {statsData.map((stat, index) => (
                         <StatsCard
                             key={index}
@@ -183,7 +176,7 @@ const Dashboard = () => {
                         />
                     ))}
                 </View>
-                <ChartCard />
+                <ChartCard data={analytics.monthlySales || []} />
             </ScrollView>
         </SafeAreaView>
     );
