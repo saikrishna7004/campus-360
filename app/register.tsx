@@ -50,7 +50,7 @@ const Register = () => {
                 className="flex-1"
             >
                 <ScrollView showsVerticalScrollIndicator={false}>
-                    <View className="flex-1 justify-center px-8 py-12">
+                    <View className="flex-1 justify-center px-8 py-12 mx-auto w-full max-w-md">
                         <View className="items-center mb-6">
                             <View className="w-32 h-32 mb-2 bg-green-100 rounded-full justify-center items-center">
                                 <FontAwesome name="user-plus" size={50} color="#166534" />
@@ -120,7 +120,7 @@ const Register = () => {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="py-3 mt-2"
+                                className="py-3"
                                 onPress={() => router.push('/login')}
                             >
                                 <Text className="text-green-800 text-center">Already have an account? Login</Text>

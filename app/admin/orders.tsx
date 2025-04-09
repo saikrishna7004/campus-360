@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import useOrderStore from '@/store/orderStore'
 import useAuthStore from '@/store/authStore'
+import { useFocusEffect } from '@react-navigation/native'
 
 const Orders = () => {
     const [activeTab, setActiveTab] = useState<'preparing' | 'ready'>('preparing')
@@ -11,18 +12,21 @@ const Orders = () => {
     const { orders, updateOrderStatus, fetchOrders, fetchNewOrders, loading } = useOrderStore()
     const { getAuthHeader } = useAuthStore()
 
-    useEffect(() => {
-        const authHeader = getAuthHeader()
-        fetchOrders(authHeader)
+    useFocusEffect(
+        useCallback(() => {
+            const authHeader = getAuthHeader()
+            fetchOrders(authHeader)
 
-        const interval = setInterval(() => fetchNewOrders(authHeader), 15000)
-        return () => clearInterval(interval)
-    }, [])
+            const interval = setInterval(() => fetchNewOrders(authHeader), 30000)
+
+            return () => clearInterval(interval)
+        }, [getAuthHeader, fetchOrders, fetchNewOrders])
+    )
 
     const onRefresh = useCallback(() => {
         setRefreshing(true)
         fetchOrders(getAuthHeader()).finally(() => setRefreshing(false))
-    }, [])
+    }, [getAuthHeader, fetchOrders])
 
     const handleUpdateStatus = useCallback((orderId: string, newStatus: 'preparing' | 'ready' | 'completed') => {
         Alert.alert('Update Order Status', `Mark this order as ${newStatus}?`, [
@@ -38,7 +42,7 @@ const Orders = () => {
                 }
             }
         ])
-    }, [])
+    }, [updateOrderStatus, getAuthHeader])
 
     const filteredOrders = useMemo(() => orders.filter(order => order.status === activeTab), [orders, activeTab])
 
