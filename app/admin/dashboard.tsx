@@ -245,8 +245,8 @@ const Dashboard = () => {
                 </View>
 
                 <Animated.View style={{ opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}>
-                    <View className="rounded-xl px-4">
-                        <Text className="text-lg font-semibold mb-2">Sales Overview</Text>
+                    <View className="rounded-xl">
+                        <Text className="text-lg font-semibold mb-4 px-4">Sales Overview</Text>
                         <LineChart
                             data={{
                                 labels: analytics?.chartData?.labels || [],
@@ -259,20 +259,22 @@ const Dashboard = () => {
                             width={Dimensions.get('window').width - 32}
                             height={220}
                             chartConfig={{
-                                backgroundColor: '#059669',
-                                backgroundGradientFrom: '#059669',
-                                backgroundGradientTo: '#10B981',
+                                // backgroundColor: '#059669',
+                                backgroundGradientFrom: '#ffffff',
+                                backgroundGradientTo: '#ffffff',
                                 decimalPlaces: 0,
-                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                
+                                // #059669
+                                color: (opacity = 1) => `rgba(5, 170, 105, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                                 propsForDots: {
                                     r: '6',
                                     strokeWidth: '2',
-                                    stroke: '#047857'
+                                    stroke: '#05AA69'
                                 },
                                 propsForBackgroundLines: {
                                     strokeDasharray: '',
-                                    stroke: "rgba(255, 255, 255, 0.1)"
+                                    stroke: "rgba(0, 0, 0, 0.1)"
                                 }
                             }}
                             bezier
