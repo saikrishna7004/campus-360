@@ -7,6 +7,7 @@ import { ProductItem } from '@/components/Product'
 import { StatusBar } from 'expo-status-bar'
 import { FontAwesome } from '@expo/vector-icons'
 import axios from 'axios'
+import useAuthStore from '@/store/authStore'
 
 const VENDOR_TYPE = 'stationery';
 
@@ -17,15 +18,40 @@ const Stationery: React.FC = () => {
         Stationery: true
     })
     const [menuItems, setMenuItems] = useState<ProductItem[]>([])
+    const [isOffline, setIsOffline] = useState(false)
+    const { getAuthHeader } = useAuthStore();
+
+    const fetchVendorStatus = async () => {
+        try {
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/vendor/status/stationery`, {
+                headers: getAuthHeader()
+            })
+            setIsOffline(!response.data.isAvailable)
+        } catch (error) {
+            console.error('Error fetching vendor status:', error)
+            setIsOffline(true)
+        }
+    }
 
     useEffect(() => {
-        fetchMenuItems()
+        fetchVendorStatus()
     }, [])
+
+    useEffect(() => {
+        if(!isOffline) {
+            fetchMenuItems();
+        }
+    }, [isOffline])
 
     const fetchMenuItems = async () => {
         try {
             const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/product/stationery`)
-            setMenuItems(response.data)
+            if(response.data?.isAvailable === false) {
+                setIsOffline(true)
+            }
+            else {
+                setMenuItems(response.data)
+            }
         } catch (error) {
             console.error('Error fetching menu items:', error)
         } finally {
@@ -35,7 +61,7 @@ const Stationery: React.FC = () => {
 
     const onRefresh = () => {
         setRefreshing(true)
-        fetchMenuItems().finally(() => setRefreshing(false))
+        fetchVendorStatus().finally(() => setRefreshing(false))
     }
 
     const toggleCategory = (category: string) => {
@@ -63,6 +89,11 @@ const Stationery: React.FC = () => {
                     <View className="w-[80%]">
                         <Text className="text-2xl font-bold mb-2 px-4">Stationery</Text>
                         <Text className="text-sm text-gray-500 mb-4 px-4">Get all your stationery needs, from pens to notebooks, all in one place inside our very own KMIT.</Text>
+                        {isOffline && (
+                            <View className="bg-red-100 mx-4 p-3 rounded-lg mb-4">
+                                <Text className="text-red-600 text-center font-medium">Currently Offline • Come back later</Text>
+                            </View>
+                        )}
                     </View>
                     <View className="flex-1 w-[100px] items-center">
                         <View className="flex-row items-center bg-green-800 rounded-lg my-2 py-2 px-3 h-[40px] justify-center">
@@ -77,7 +108,7 @@ const Stationery: React.FC = () => {
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
-                    categories.map((category) => (
+                    !isOffline && categories.map((category) => (
                         <CategorySection
                             key={category}
                             category={category}

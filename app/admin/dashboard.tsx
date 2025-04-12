@@ -263,8 +263,6 @@ const Dashboard = () => {
                                 backgroundGradientFrom: '#ffffff',
                                 backgroundGradientTo: '#ffffff',
                                 decimalPlaces: 0,
-                                
-                                // #059669
                                 color: (opacity = 1) => `rgba(5, 170, 105, ${opacity})`,
                                 labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                                 propsForDots: {

@@ -10,6 +10,7 @@ import OrderHistory from './orderHistory';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useOrderStore from '@/store/orderStore';
 import useAuthStore, { User } from '@/store/authStore';
+import axios from 'axios';
 
 const Tab = createBottomTabNavigator();
 
@@ -55,6 +56,23 @@ const AdminLayout = () => {
         };
     }, []);
 
+    const fetchVendorStatus = async () => {
+        try {
+            const vendor = user?.role === 'admin' ? 'canteen' : user?.type;
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/vendor/status/${vendor}`, {
+                headers: getAuthHeader()
+            })
+            setIsOnline(response.data.isAvailable)
+        } catch (error) {
+            console.error('Error fetching vendor status:', error)
+            setIsOnline(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchVendorStatus()
+    }, [])
+
     useEffect(() => {
         if (preparingOrdersCount > lastOrderCount && lastOrderCount !== 0) {
             playNotificationSound();
@@ -65,13 +83,24 @@ const AdminLayout = () => {
     const toggleOnlineStatus = async (value: boolean) => {
         setIsOnline(value);
         try {
-            await fetch(`${process.env.EXPO_PUBLIC_API_URL}/vendor/status`, {
+            let vendorType;
+            if(user?.role == 'admin') {
+                vendorType = 'canteen'
+            } else if(user?.role == 'vendor') {
+                vendorType = user?.type
+            }
+            const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/vendor/status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
-                body: JSON.stringify({ isOnline: value }),
+                body: JSON.stringify({ isOnline: value, vendorType: vendorType }),
             });
+            const data = await res.json();
+            console.log('Vendor status response:', data);
+
+            console.log('Vendor status updated:', value);
         } catch { }
     };
 
