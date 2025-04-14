@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, PanResponder, Dimensions, StatusBar } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, RefreshControl, Dimensions, StatusBar, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Redirect, useRouter } from 'expo-router';
+import { ExternalPathString, Redirect, RelativePathString, useRouter } from 'expo-router';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import useAuthStore from '@/store/authStore';
 import CartSummary from '@/components/Cart';
@@ -11,9 +11,48 @@ import { Icon } from '@roninoss/icons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
+const EXTERNAL_LINKS = [
+    {
+        name: 'Netra',
+        icon: 'http://kmit-netra.teleuniv.in/assets/sanjaya_about-DDG5ALmJ.png',
+        url: 'http://kmit-netra.teleuniv.in',
+    },
+    {
+        name: 'Sanjaya',
+        icon: 'http://kmit-netra.teleuniv.in/assets/sanjaya_about-DDG5ALmJ.png',
+        url: 'http://kmit-sanjaya.teleuniv.in',
+    },
+    {
+        name: 'Tesseract',
+        icon: 'https://tesseractonline.com/favicon-orange.png',
+        url: 'https://tesseractonline.com',
+    },
+    {
+        name: 'KMIT',
+        icon: 'https://kmit.in/favicon.ico',
+        url: 'https://kmit.in',
+    },
+    {
+        name: 'KMIT Alumni',
+        icon: 'https://media.almabaseapp.com/268/meta/KMIT.png',
+        url: 'https://alumni.kmit.in',
+    },
+    {
+        name: 'Telescope',
+        icon: 'http://kmitonline.com/theme/image.php/universo/theme/1739203259/favicon',
+        url: 'http://kmitonline.com/login/index.php',
+    },
+    {
+        name: 'Alumnx',
+        icon: 'https://alumnx.com/logo.png',
+        url: 'https://play.google.com/store/apps/details?id=com.alumnx.app&hl=en_IN&pli=1',
+    },
+];
+
 const Home = () => {
     const { isAuthenticated, user, logout } = useAuthStore();
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const translateX = useRef(new Animated.Value(-SCREEN_WIDTH * 0.75)).current;
     const router = useRouter();
 
@@ -34,6 +73,37 @@ const Home = () => {
         }).start(() => setSidebarVisible(false));
     };
 
+    const handleRefresh = () => {
+        setRefreshing(true);
+        router.replace('/');
+        setRefreshing(false);
+    };
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            router.replace('/');
+            setRefreshing(false);
+        }, 500);
+    }, []);
+
+    const ServiceCard = ({ name, icon, color, url }: { name: string; icon: string; color?: string; url: RelativePathString | ExternalPathString; }) => (
+        <TouchableOpacity
+            onPress={() => {
+                if (url.startsWith('http')) {
+                    Linking.openURL(url);
+                } else {
+                    router.push(url);
+                }
+            }}
+            style={[styles.card]}
+            className="p-4 rounded-lg flex justify-center items-center"
+        >
+            <Image source={{ uri: icon }} style={{ width: 70, height: 50 }} resizeMode="contain" />
+            <Text className="text-green-900 text-sm mt-3 text-center w-[100px]">{name}</Text>
+        </TouchableOpacity>
+    );
+
     if (!isAuthenticated) {
         return <Redirect href="/login" />;
     }
@@ -47,6 +117,9 @@ const Home = () => {
                     <MaterialCommunityIcons name="menu" size={24} color="black" />
                 </TouchableOpacity>
                 <Text className="ml-4 font-bold text-[18px]">Campus 360</Text>
+                <TouchableOpacity onPress={handleRefresh} style={{ marginLeft: 'auto' }}>
+                    <MaterialCommunityIcons name="refresh" size={24} color="black" />
+                </TouchableOpacity>
             </View>
 
             {sidebarVisible && (
@@ -63,7 +136,12 @@ const Home = () => {
                 translateX={translateX}
             />
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+            <ScrollView 
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
                 <View className="mb-4 px-4">
                     <Image
                         source={require('@/assets/images/banner.png')}
@@ -72,41 +150,41 @@ const Home = () => {
                     />
                 </View>
                 <View className="px-4">
-                    <Text className="text-lg font-bold text-green-900 mb-4">Services</Text>
+                    <Text className="text-lg font-bold text-zinc-900 mb-4">Services</Text>
                     <View className="flex flex-row flex-wrap gap-2">
                         {(!user?.role || user?.role === 'student' || user?.role === 'admin') && (
                             <>
                                 {
                                     Object.entries(studentOptions).map(([key, { name, icon, color, url }]) => (
-                                        <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
-                                            <Text className="text-green-900 text-sm mt-2">{name}</Text>
-                                        </TouchableOpacity>
+                                        <ServiceCard key={key} name={name} icon={icon} color={color} url={url as RelativePathString | ExternalPathString} />
                                     ))
                                 }
                             </>
                         )}
                     </View>
                 </View>
+                
+                <View className="px-4 mt-6">
+                    <Text className="text-lg font-bold text-zinc-900 mb-4">College Apps</Text>
+                    <View className="flex flex-row flex-wrap gap-2">
+                        {EXTERNAL_LINKS.map((link, index) => (
+                            <ServiceCard key={index} name={link.name} icon={link.icon} url={link.url as RelativePathString | ExternalPathString} />
+                        ))}
+                    </View>
+                </View>
                 {(user?.role === 'admin' || user?.role === 'vendor') && (
                     <View className="px-4 mt-6">
-                        <Text className="text-lg font-bold text-green-900 mb-4">Admin & Vendor</Text>
+                        <Text className="text-lg font-bold text-zinc-900 mb-4">Admin & Vendor</Text>
                         <View className="flex flex-row flex-wrap gap-2">
                             <>
                                 {
                                     Object.entries(vendorOptions).map(([key, { name, icon, color, url }]) => (
-                                        <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
-                                            <Text className="text-green-900 text-sm mt-2">{name}</Text>
-                                        </TouchableOpacity>
+                                        <ServiceCard key={key} name={name} icon={icon} color={color} url={url as RelativePathString | ExternalPathString} />
                                     ))
                                 }
                                 {
                                     Object.entries(adminOptions).map(([key, { name, icon, color, url }]) => (
-                                        <TouchableOpacity key={key} onPress={() => router.push(url)} style={styles.card} className="p-4 rounded-lg flex justify-center items-center">
-                                            <Image source={{ uri: icon }} style={{ width: 50, height: 50 }} />
-                                            <Text className="text-green-900 text-sm mt-2">{name}</Text>
-                                        </TouchableOpacity>
+                                        <ServiceCard key={key} name={name} icon={icon} color={color} url={url as RelativePathString | ExternalPathString} />
                                     ))
                                 }
                             </>
