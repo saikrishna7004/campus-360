@@ -48,7 +48,7 @@ const Orders = () => {
 
     const handleOrderPress = (order: Order) => {
         router.push({
-            pathname: "/admin/(tabs)/order-details",
+            pathname: "/admin-order-details",
             params: { order: JSON.stringify(order) }
         });
     };

@@ -19,8 +19,8 @@ interface CartProductItem {
 }
 
 const CartProduct = ({ item, rootClassName, iconClassName }: { item: CartProductItem, rootClassName?: string, iconClassName?: string }) => {
-    const { getCartByVendor, increaseQuantity, decreaseQuantity, getDocumentById } = useCartStore()
-    
+    const { getCartByVendor, increaseQuantity, decreaseQuantity, getDocumentById, removeDocument } = useCartStore()
+
     const vendor: 'canteen' | 'stationery' | 'default' = (item.vendor as 'canteen' | 'stationery' | 'default') || 'default'
     const cart = getCartByVendor(vendor)
     const itemInCart = cart.find((cartItem) => cartItem._id === item._id)
@@ -44,10 +44,17 @@ const CartProduct = ({ item, rootClassName, iconClassName }: { item: CartProduct
                 {document && (
                     <View className="mt-1">
                         <Text className="text-xs text-gray-500">
-                            {document.printingOptions.colorType === 'bw' ? 'B&W' : 'Color'} • 
-                            {document.printingOptions.printSides === 'single' ? 'Single' : 'Double'} • 
+                            {document.printingOptions.colorType === 'bw' ? 'B&W' : 'Color'} •
+                            {document.printingOptions.printSides === 'single' ? 'Single' : 'Double'} •
                             {document.printingOptions.numberOfCopies} copies
                         </Text>
+                        <TouchableOpacity
+                            onPress={() => removeDocument(item._id)}
+                            className="mt-1 flex-row items-center"
+                        >
+                            <FontAwesome name="trash-o" size={16} color="#DC2626" />
+                            <Text className="text-red-600 text-sm ml-1">Remove</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>
