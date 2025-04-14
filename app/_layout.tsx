@@ -65,6 +65,24 @@ export default function RootLayout() {
                                 presentation: 'modal'
                             }} 
                         />
+                        <Stack.Screen 
+                            name="admin/news" 
+                            options={{ 
+                                headerShown: true,
+                                headerTitle: "News Management",
+                                headerStyle: { backgroundColor: '#f5f5f5' },
+                                headerTintColor: '#166534'
+                            }} 
+                        />
+                        <Stack.Screen 
+                            name="news" 
+                            options={{ 
+                                headerShown: true,
+                                headerTitle: "News",
+                                headerStyle: { backgroundColor: '#f5f5f5' },
+                                headerTintColor: '#166534'
+                            }} 
+                        />
                         <Stack.Screen name="not-found" />
                         <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
                     </Stack>

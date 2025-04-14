@@ -54,5 +54,11 @@ export const adminOptions: Record<string, HomeMenuOptions> = {
         icon: 'https://cdn-icons-png.flaticon.com/512/8644/8644456.png',
         color: '#1E3A8A',
         url: '/admin/dashboard',
+    },
+    news: {
+        name: 'News',
+        icon: 'https://cdn-icons-png.flaticon.com/512/2965/2965879.png',
+        color: '#1E3A8A',
+        url: '/admin/news',
     }
-}; 
+};

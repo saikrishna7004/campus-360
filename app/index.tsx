@@ -1,13 +1,14 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, RefreshControl, Dimensions, StatusBar, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ExternalPathString, Redirect, RelativePathString, useRouter } from 'expo-router';
+import { ExternalPathString, Link, Redirect, RelativePathString, useRouter } from 'expo-router';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import useAuthStore from '@/store/authStore';
 import CartSummary from '@/components/Cart';
 import { adminOptions, studentOptions, vendorOptions } from '@/constants/types';
 import Sidebar from '@/components/Sidebar';
 import { Icon } from '@roninoss/icons';
+import { NewsItem } from '@/types/news';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -53,6 +54,7 @@ const Home = () => {
     const { isAuthenticated, user, logout } = useAuthStore();
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [news, setNews] = useState<NewsItem[]>([]);
     const translateX = useRef(new Animated.Value(-SCREEN_WIDTH * 0.75)).current;
     const router = useRouter();
 
@@ -87,6 +89,27 @@ const Home = () => {
         }, 500);
     }, []);
 
+    const fetchNews = async () => {
+        try {
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/news`);
+            const data = await response.json() as NewsItem[];
+            setNews(data);
+        } catch (error) {
+            console.error('Failed to fetch news:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchNews();
+    }, []);
+
+    const handleNewsPress = (newsId: string) => {
+        router.push({
+            pathname: '/news',
+            params: { id: newsId }
+        });
+    };
+
     const ServiceCard = ({ name, icon, color, url }: { name: string; icon: string; color?: string; url: RelativePathString | ExternalPathString; }) => (
         <TouchableOpacity
             onPress={() => {
@@ -107,6 +130,8 @@ const Home = () => {
     if (!isAuthenticated) {
         return <Redirect href="/login" />;
     }
+
+    const bannerNews = news.find(item => item.isBanner);
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top', 'left', 'right']}>
@@ -136,7 +161,7 @@ const Home = () => {
                 translateX={translateX}
             />
 
-            <ScrollView 
+            <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -144,11 +169,45 @@ const Home = () => {
             >
                 <View className="mb-4 px-4">
                     <Image
-                        source={require('@/assets/images/banner.png')}
-                        style={styles.banner}
+                        source={bannerNews?.image ? { uri: bannerNews.image } : require('@/assets/images/banner.png')}
+                        style={[styles.banner]}
                         resizeMode="cover"
                     />
+                    {bannerNews && (
+                        <View className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
+                            <Text className="text-white font-bold">{bannerNews.title}</Text>
+                        </View>
+                    )}
                 </View>
+
+                {news.length > 0 && (
+                    <View className="px-4 mb-6">
+                        <Text className="text-lg font-bold text-zinc-900 mb-4">Latest News</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {news.map((item: NewsItem) => (
+                                <Link
+                                    href={{ pathname: '/news', params: { id: item._id } }}
+                                    key={item._id}
+                                    onPress={() => handleNewsPress(item._id)}
+                                    className="mr-4 bg-gray-50 rounded-lg p-4"
+                                    style={{ width: 300 }}
+                                >
+                                    {item.image && (
+                                        <Image
+                                            source={{ uri: item.image }}
+                                            style={{ width: '100%', height: 150 }}
+                                            resizeMode="cover"
+                                            className="rounded-lg mb-2"
+                                        />
+                                    )}
+                                    <Text className="font-bold text-base mb-2">{item.title}</Text>
+                                    <Text numberOfLines={3} className="text-gray-600">{item.content}</Text>
+                                </Link>
+                            ))}
+                        </ScrollView>
+                    </View>
+                )}
+
                 <View className="px-4">
                     <Text className="text-lg font-bold text-zinc-900 mb-4">Services</Text>
                     <View className="flex flex-row flex-wrap gap-2">
@@ -163,7 +222,7 @@ const Home = () => {
                         )}
                     </View>
                 </View>
-                
+
                 <View className="px-4 mt-6">
                     <Text className="text-lg font-bold text-zinc-900 mb-4">College Apps</Text>
                     <View className="flex flex-row flex-wrap gap-2">
