@@ -1,12 +1,18 @@
 import { create } from 'zustand';
 import axios from 'axios';
-import { VendorType } from './cartStore';
+import useCartStore, { VendorType } from './cartStore';
 
 export interface OrderItem {
     productId: string;
     name: string;
     quantity: number;
     price: number;
+    isPrintItem?: boolean;
+    documentDetails?: {
+        url: string;
+        name: string;
+        printingOptions: any;
+    };
 }
 
 export interface Order {
@@ -122,33 +128,38 @@ const useOrderStore = create<OrderStore>((set, get) => ({
     placeOrder: async (items, totalAmount, vendor, authHeader) => {
         set({ loading: true });
         try {
-            const orderPayload = {
-                items,
-                totalAmount,
-                vendor,
-                paymentMethod: 'Google Pay UPI',
-                status: 'preparing'
-            };
-            
+            const { documents } = useCartStore.getState();
+            const orderItems = items.map(item => {
+                if (item.productId.startsWith('print_')) {
+                    const doc = documents.find(d => d.id === item.productId);
+                    return {
+                        ...item,
+                        documentDetails: doc
+                    };
+                }
+                return item;
+            });
+
             const response = await axios.post(
                 `${process.env.EXPO_PUBLIC_API_URL}/orders`,
-                orderPayload,
                 {
-                    headers: authHeader
-                }
+                    items: orderItems,
+                    totalAmount,
+                    vendor
+                },
+                { headers: authHeader }
             );
             
             const newOrder = response.data;
-            
             set(state => ({
                 activeOrders: [newOrder, ...state.activeOrders],
                 loading: false
             }));
             
-            return response.data.orderId;
+            return newOrder.orderId;
         } catch (error) {
-            set({ loading: false });
-            throw new Error('Failed to place order');
+            set({ loading: false, error: 'Failed to place order' });
+            throw error;
         }
     },
     

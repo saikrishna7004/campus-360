@@ -39,7 +39,7 @@ const OrderCard = ({ order, onPress }: { order: Order; onPress: () => void }) =>
 
             <View className="mt-2">
                 {order.items?.slice(0, 2).map((orderItem: OrderItem, index: number) => (
-                    <Text key={index} className="text-gray-700">
+                    <Text key={orderItem.productId + index} className="text-gray-700">
                         {orderItem.quantity}x {orderItem.name}
                     </Text>
                 ))}

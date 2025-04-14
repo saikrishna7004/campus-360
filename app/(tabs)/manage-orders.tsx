@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useOrderStore from '@/store/orderStore';
+import useAuthStore from '@/store/authStore';
 
 export default function ManageOrders() {
     const { fetchOrders, orders, updateOrderStatus } = useOrderStore();
     const [refreshing, setRefreshing] = useState(false);
+    const { getAuthHeader } = useAuthStore();
 
     useEffect(() => {
-        fetchOrders();
+        fetchOrders(getAuthHeader());
 
         const interval = setInterval(() => {
-            fetchOrders();
         }, 30000);
 
         return () => clearInterval(interval);
@@ -19,7 +20,7 @@ export default function ManageOrders() {
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchOrders();
+        await fetchOrders(getAuthHeader());
         setRefreshing(false);
     };
 
@@ -29,7 +30,7 @@ export default function ManageOrders() {
 
     const handleStatusChange = async (orderId: string, newStatus: 'preparing' | 'ready' | 'completed' | 'cancelled') => {
         try {
-            await updateOrderStatus(orderId, newStatus);
+            await updateOrderStatus(orderId, newStatus, getAuthHeader());
         } catch (error) {
             console.error('Failed to update status:', error);
         }

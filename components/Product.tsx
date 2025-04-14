@@ -2,6 +2,7 @@ import useCartStore from '@/store/cartStore'
 import { View, Image, Text, TouchableOpacity } from 'react-native'
 import type { VendorType } from '@/store/cartStore'
 import { cn } from '@/lib/cn'
+import { PrintingOptions } from './PrintingOptionsModal'
 
 interface ProductItem {
     _id: string
@@ -13,21 +14,33 @@ interface ProductItem {
     imageUrl?: string
 }
 
-const Product = ({ item, vendor, rootClassName }: { item: ProductItem, vendor?: VendorType, rootClassName?: string }) => {
+const Product = ({ item, vendor, rootClassName, onPrintingOptions }: { 
+    item: ProductItem, 
+    vendor?: VendorType, 
+    rootClassName?: string,
+    onPrintingOptions?: (item: ProductItem) => void 
+}) => {
     const { getCartByVendor, addToCart, decreaseQuantity } = useCartStore()
-    
+
+    const isPrintItem = item.name.toLowerCase().includes('print')
     const vendorValue = vendor || 'default'
     const cartItems = getCartByVendor(vendorValue)
-    const itemInCart = cartItems.find((cartItem) => cartItem._id === item._id)
+    const itemInCart = !isPrintItem ? cartItems.find((cartItem) => cartItem._id === item._id) : null
 
     const handleAddToCart = () => {
+        if (isPrintItem) {
+            onPrintingOptions?.(item);
+            return;
+        }
+
         addToCart({
             _id: item._id,
             name: item.name,
             price: item.price,
             vendor: vendorValue,
-            imageUrl: item.imageUrl
-        })
+            imageUrl: item.imageUrl,
+            isPrintItem: false
+        });
     }
 
     if (item.inStock === false) {
@@ -47,7 +60,7 @@ const Product = ({ item, vendor, rootClassName }: { item: ProductItem, vendor?: 
                 <Text className="text-md text-black">₹{item.price}</Text>
             </View>
             <View className="flex-row items-center space-x-2">
-                {itemInCart ? (
+                {itemInCart && !isPrintItem ? (
                     <View className='flex flex-row border border-green-700 rounded-md items-center justify-center bg-green-700'>
                         <TouchableOpacity
                             onPress={() => decreaseQuantity(item._id, vendorValue)}
@@ -69,7 +82,9 @@ const Product = ({ item, vendor, rootClassName }: { item: ProductItem, vendor?: 
                         className='flex flex-row pe-3 ps-4 py-1 border border-green-700 rounded-md items-center justify-center bg-green-50'
                     >
                         <View className='text-green-700 gap-2 flex flex-row justify-center items-center'>
-                            <Text className='text-green-700 text-xs font-semibold ps-1 leading-5'>ADD</Text>
+                            <Text className='text-green-700 text-xs font-semibold ps-1 leading-5'>
+                                {isPrintItem ? 'PRINT' : 'ADD'}
+                            </Text>
                             <Text className='text-green-700 text-lg ps-1 leading-5'>+</Text>
                         </View>
                     </TouchableOpacity>

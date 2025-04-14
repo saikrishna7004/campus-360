@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import useAuthStore from './authStore';
 import fetchWithHeader from '@/utils/fetchWithHeader';
+import { PrintingOptions } from '@/components/PrintingOptionsModal';
 
 const VENDOR_TYPES = ['canteen', 'stationery', 'default'] as const;
 type VendorType = typeof VENDOR_TYPES[number];
@@ -11,8 +12,13 @@ interface CartItem {
     name: string;
     price: number;
     quantity: number;
-    imageUrl?: string;
     vendor: VendorType;
+    imageUrl?: string;
+    isPrintItem?: boolean;
+    pricePerPageBW?: number;
+    pricePerPageColor?: number;
+    supportedSizes?: string[];
+    printingOptions?: PrintingOptions;
 }
 
 interface VendorCart {
@@ -20,83 +26,123 @@ interface VendorCart {
     items: CartItem[];
 }
 
+interface DocumentItem {
+    id: string;
+    name: string;
+    url: string;
+    printingOptions: PrintingOptions;
+    cartItemId?: string;
+}
+
+interface CartResponse {
+    item: {
+        _id: string;
+        name: string;
+        price: number;
+        imageUrl?: string;
+        image?: string;
+        isPrintItem?: boolean;
+        pricePerPageBW?: number;
+        pricePerPageColor?: number;
+        supportedSizes?: string[];
+        printingOptions?: PrintingOptions;
+    };
+    quantity: number;
+    vendor: VendorType;
+}
+
 interface CartStore {
     carts: VendorCart[];
     loading: boolean;
     error: string | null;
     authHeader?: () => any;
-    addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+    documents: DocumentItem[];
+    addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>;
     removeFromCart: (id: string, vendor: string) => void;
     increaseQuantity: (id: string, vendor: string) => void;
     decreaseQuantity: (id: string, vendor: string) => void;
     clearCart: (vendor?: string) => void;
-    syncCartToCloud: (authHeader: any) => Promise<void>;
+    syncCartToCloud: (authHeader?: any) => Promise<void>;
     fetchCartFromCloud: (authHeader: any) => Promise<void>;
     getCartByVendor: (vendor: string) => CartItem[];
     getVendorCarts: () => VendorCart[];
     getTotalItems: () => number;
+    addDocument: (document: DocumentItem) => void;
+    removeDocument: (id: string) => void;
+    getDocumentById: (id: string) => DocumentItem | undefined;
 }
-
-const syncCartWithCloud = async (get: any, set: any) => {
-    try {
-        const authHeader = useAuthStore.getState().getAuthHeader();
-        if (authHeader) {
-            await fetchWithHeader(`${process.env.EXPO_PUBLIC_API_URL}/cart/sync`, 'post', {
-                carts: get().carts || []
-            });
-            set({ loading: false });
-        } else {
-            set({ loading: false, error: 'No authentication header available' });
-        }
-    } catch (error) {
-        set({ error: 'Failed to sync cart to cloud' });
-    }
-};
 
 const useCartStore = create<CartStore>((set, get) => ({
     carts: [],
     loading: false,
     error: null,
+    documents: [],
 
-    addToCart: (item) => {
+    addDocument: (document) => {
+        set(state => ({
+            documents: [...state.documents, document]
+        }));
+    },
+
+    removeDocument: (id) => {
+        set(state => {
+            const newState = {
+                documents: state.documents.filter(doc => doc.id !== id),
+                carts: state.carts.map(cart => ({
+                    ...cart,
+                    items: cart.items.filter(item => !item.isPrintItem || item._id !== id)
+                })).filter(cart => cart.items.length > 0)
+            };
+            get().syncCartToCloud();
+            return newState;
+        });
+    },
+
+    getDocumentById: (id) => {
+        return get().documents.find(doc => doc.id === id);
+    },
+
+    addToCart: async (item) => {
+        const uniqueId = item.isPrintItem ? `print_${new Date().getTime()}` : item._id;
+        
         set((state) => {
             const vendor = item.vendor || 'default';
             const existingCartIndex = state.carts.findIndex(cart => cart.vendor === vendor);
+            const newItem = {
+                ...item,
+                _id: uniqueId,
+                quantity: 1
+            };
 
+            let newCarts;
             if (existingCartIndex >= 0) {
-                const updatedCarts = [...state.carts];
-                const existingCart = updatedCarts[existingCartIndex];
-                const existingItemIndex = existingCart.items.findIndex(cartItem => cartItem._id === item._id);
-
-                if (existingItemIndex >= 0) {
-                    existingCart.items[existingItemIndex].quantity += 1;
-                } else {
-                    existingCart.items.push({
-                        ...item,
-                        quantity: 1,
-                        imageUrl: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
-                    });
-                }
-
-                return { carts: updatedCarts };
-            }
-
-            return {
-                carts: [
+                newCarts = [...state.carts];
+                newCarts[existingCartIndex].items.push(newItem);
+            } else {
+                newCarts = [
                     ...state.carts,
                     {
                         vendor,
-                        items: [{
-                            ...item,
-                            quantity: 1,
-                            imageUrl: item.imageUrl || 'https://restaurantclicks.com/wp-content/uploads/2022/05/Most-Popular-American-Foods.jpg',
-                        }],
-                    },
-                ],
-            };
+                        items: [newItem]
+                    }
+                ];
+            }
+
+            return { carts: newCarts };
         });
 
-        syncCartWithCloud(get, set);
+        if (item.isPrintItem && item.printingOptions) {
+            const document = {
+                id: uniqueId,
+                name: item.name,
+                url: item.printingOptions.documentUrl || '',
+                printingOptions: item.printingOptions,
+                cartItemId: uniqueId
+            };
+            get().addDocument(document);
+        }
+
+        await get().syncCartToCloud();
     },
 
     removeFromCart: (id, vendor) => {
@@ -107,8 +153,6 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             ).filter(cart => cart.items.length > 0)
         }));
-
-        syncCartWithCloud(get, set);
     },
 
     increaseQuantity: (id, vendor) => {
@@ -126,8 +170,6 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             )
         }));
-
-        syncCartWithCloud(get, set);
     },
 
     decreaseQuantity: (id, vendor) => {
@@ -145,8 +187,6 @@ const useCartStore = create<CartStore>((set, get) => ({
                     : cart
             ).filter(cart => cart.items.length > 0)
         }));
-
-        syncCartWithCloud(get, set);
     },
 
     clearCart: (vendor) => {
@@ -155,58 +195,91 @@ const useCartStore = create<CartStore>((set, get) => ({
                 ? state.carts.filter(cart => cart.vendor !== vendor)
                 : []
         }));
-
-        syncCartWithCloud(get, set);
     },
 
-    syncCartToCloud: async () => {
-        set({ loading: true, error: null });
+    syncCartToCloud: async (authHeader) => {
         try {
-            await fetchWithHeader(`${process.env.EXPO_PUBLIC_API_URL}/cart/sync`, 'post', {
-                carts: get().carts || []
-            });
-            set({ loading: false });
+            const header = authHeader || useAuthStore.getState().getAuthHeader();
+            if (!header) throw new Error('No auth header available');
+
+            const payload = {
+                carts: get().carts,
+                documents: get().documents
+            };
+
+            const { data } = await axios.post(
+                `${process.env.EXPO_PUBLIC_API_URL}/cart/sync`,
+                payload,
+                { headers: header }
+            );
+
+            set({ error: null });
+            return data;
         } catch (error) {
-            set({ loading: false, error: 'Failed to sync cart to cloud' });
+            console.error('Sync error:', error);
+            set({ error: 'Failed to sync cart' });
+            throw error;
         }
     },
 
     fetchCartFromCloud: async (authHeader) => {
-        set({ loading: true, error: null });
+        set({ loading: true });
         try {
-            const response = await axios.get(
-                `${process.env.EXPO_PUBLIC_API_URL}/cart/latest`,
-                { headers: authHeader }
-            );
-            if (response.data?.cart) {
-                const groupedCarts: Record<VendorType, CartItem[]> = response.data.cart.items.reduce((acc: Record<VendorType, CartItem[]>, cartItem: any) => {
-                    const vendor = cartItem.item.type || 'default';
-                    if (!acc[vendor as VendorType]) {
-                        acc[vendor as VendorType] = [];
-                    }
-                    acc[vendor as VendorType].push({
-                        _id: cartItem.item._id,
-                        name: cartItem.item.name,
-                        price: cartItem.item.price,
-                        quantity: cartItem.quantity,
-                        imageUrl: cartItem.item.imageUrl || cartItem.item.image,
-                        vendor: vendor as VendorType,
-                    });
-                    return acc;
-                }, {} as Record<VendorType, CartItem[]>);
+            const { data } = await axios.get<{
+                cart: {
+                    items: Array<{
+                        _id: string;
+                        name: string;
+                        price: number;
+                        quantity: number;
+                        vendor: string;
+                        imageUrl?: string;
+                        isPrintItem?: boolean;
+                        printingOptions?: PrintingOptions;
+                    }>;
+                };
+                documents: DocumentItem[];
+            }>(`${process.env.EXPO_PUBLIC_API_URL}/cart/latest`, { headers: authHeader });
 
-                const normalizedCarts: VendorCart[] = Object.entries(groupedCarts).map(([vendor, items]) => ({
+            if (!data?.cart?.items) {
+                set({ carts: [], documents: [], loading: false });
+                return;
+            }
+
+            const vendorGroups = data.cart.items.reduce<Record<VendorType, CartItem[]>>((acc, item) => {
+                const vendor = (item.vendor || 'default') as VendorType;
+                if (!acc[vendor]) acc[vendor] = [];
+                
+                const cartItem: CartItem = {
+                    _id: item._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity || 1,
+                    vendor,
+                    imageUrl: item.imageUrl,
+                    isPrintItem: item.isPrintItem,
+                    printingOptions: item.printingOptions
+                };
+                
+                acc[vendor].push(cartItem);
+                return acc;
+            }, {} as Record<VendorType, CartItem[]>);
+
+            const normalizedCarts: VendorCart[] = Object.entries(vendorGroups)
+                .map(([vendor, items]): VendorCart => ({
                     vendor: vendor as VendorType,
-                    items,
+                    items
                 }));
 
-                set({ carts: normalizedCarts, loading: false });
-            } else {
-                set({ carts: [], loading: false });
-            }
-        } catch (error: any) {
-            console.error('Error fetching latest cart:', error.response?.data || error.message);
-            set({ loading: false, error: 'Failed to fetch cart from cloud' });
+            set({
+                carts: normalizedCarts,
+                documents: data.documents || [],
+                loading: false,
+                error: null
+            });
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            set({ loading: false, error: 'Failed to fetch cart' });
         }
     },
 
@@ -222,4 +295,4 @@ const useCartStore = create<CartStore>((set, get) => ({
 }));
 
 export default useCartStore;
-export type { CartItem, VendorCart, VendorType };
+export type { CartItem, VendorCart, VendorType, DocumentItem };

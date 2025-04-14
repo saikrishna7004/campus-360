@@ -130,15 +130,8 @@ const Cart = () => {
     if (!vendor || cartItems.length === 0) {
         return (
             <SafeAreaView className="flex-1 bg-white">
-                <View className="flex-row justify-between items-center px-4 py-2 bg-white">
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <FontAwesome name="arrow-left" size={20} color="black" />
-                    </TouchableOpacity>
-                    <Text className="text-lg font-bold">Cart</Text>
-                    <View style={{ width: 20 }} />
-                </View>
-                <View className="flex-1 items-center justify-center">
-                    <Text className="text-gray-500 mb-2">Your cart is empty</Text>
+                <View className="flex-1 items-center mb-10 justify-center">
+                    <Text className="text-gray-700 mb-2 text-xl">Your cart is empty</Text>
                     <TouchableOpacity
                         className="mt-4 bg-green-700 px-4 py-2 rounded-md"
                         onPress={() => router.replace('/')}

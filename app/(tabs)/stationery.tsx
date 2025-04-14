@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar'
 import { FontAwesome } from '@expo/vector-icons'
 import axios from 'axios'
 import useAuthStore from '@/store/authStore'
+import useCartStore from '@/store/cartStore'
+import PrintingOptionsModal, { PrintingOptions } from '@/components/PrintingOptionsModal';
 
 const VENDOR_TYPE = 'stationery';
 
@@ -15,11 +17,15 @@ const Stationery: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false)
     const [loading, setLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({
-        Stationery: true
+        Print: true,
+        Stationery: true,
     })
     const [menuItems, setMenuItems] = useState<ProductItem[]>([])
     const [isOffline, setIsOffline] = useState(false)
     const { getAuthHeader } = useAuthStore();
+    const { addToCart } = useCartStore();
+    const [showPrintingModal, setShowPrintingModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
 
     const fetchVendorStatus = async () => {
         try {
@@ -75,7 +81,32 @@ const Stationery: React.FC = () => {
         return menuItems.filter((item) => item.category === category)
     }
 
-    const categories = ['Stationery']
+    const handlePrintingOptions = (product: ProductItem) => {
+        setSelectedProduct(product);
+        setShowPrintingModal(true);
+    };
+
+    const handlePrintingSubmit = (options: PrintingOptions) => {
+        if (!selectedProduct) return;
+        
+        const pricePerPage = options.colorType === 'bw' ? 2 : 10;
+        const totalPrice = pricePerPage * (options.numberOfPages || 1) * options.numberOfCopies;
+        
+        addToCart({
+            _id: selectedProduct._id,
+            name: `${selectedProduct.name} - ${options.documentName || 'Document'}`,
+            price: totalPrice,
+            vendor: VENDOR_TYPE,
+            imageUrl: selectedProduct.imageUrl,
+            printingOptions: options,
+            isPrintItem: true
+        });
+        
+        setShowPrintingModal(false);
+        setSelectedProduct(null);
+    };
+
+    const categories = ['Print', 'Stationery']
 
     return (
         <SafeAreaView className="flex-1 bg-white" style={{ paddingTop: -28 }}>
@@ -119,11 +150,17 @@ const Stationery: React.FC = () => {
                                 vendor: VENDOR_TYPE
                             }))}
                             vendor={VENDOR_TYPE}
+                            onPrintingOptions={handlePrintingOptions}
                         />
                     ))
                 )}
             </ScrollView>
             <CartSummary />
+            <PrintingOptionsModal 
+                isVisible={showPrintingModal}
+                onClose={() => setShowPrintingModal(false)}
+                onSubmit={handlePrintingSubmit}
+            />
         </SafeAreaView>
     )
 }
