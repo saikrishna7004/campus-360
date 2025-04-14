@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
@@ -46,7 +46,8 @@ export default function OrderDetails() {
             }
             await Linking.openURL(url);
         } catch (error) {
-            console.error('Error opening document:', error);
+            // console.error('Error opening document:', error);
+            Alert.alert('Error', 'Failed to open document. Please try again later.');
         }
     };
 

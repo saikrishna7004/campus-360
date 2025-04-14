@@ -249,7 +249,9 @@ const Dashboard = () => {
                         <Text className="text-lg font-semibold mb-4 px-4">Sales Overview</Text>
                         <LineChart
                             data={{
-                                labels: analytics?.chartData?.labels || [],
+                                labels: analytics?.chartData?.labels?.map(label => 
+                                    label ? (label.includes(' ') ? label : `${label}`) : ''
+                                ) || [],
                                 datasets: [{
                                     data: analytics?.chartData?.values?.length ? 
                                         analytics.chartData.values : 

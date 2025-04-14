@@ -61,7 +61,6 @@ export default function RootLayout() {
                                 headerShown: true,
                                 headerTitle: "Order Details",
                                 headerStyle: { backgroundColor: '#f5f5f5' },
-                                headerTintColor: '#166534',
                                 presentation: 'modal'
                             }} 
                         />
@@ -70,8 +69,7 @@ export default function RootLayout() {
                             options={{ 
                                 headerShown: true,
                                 headerTitle: "News Management",
-                                headerStyle: { backgroundColor: '#f5f5f5' },
-                                headerTintColor: '#166534'
+                                headerStyle: { backgroundColor: '#f5f5f5' }
                             }} 
                         />
                         <Stack.Screen 
@@ -79,12 +77,12 @@ export default function RootLayout() {
                             options={{ 
                                 headerShown: true,
                                 headerTitle: "News",
-                                headerStyle: { backgroundColor: '#f5f5f5' },
-                                headerTintColor: '#166534'
+                                headerStyle: { backgroundColor: '#f5f5f5' }
                             }} 
                         />
+                        <Stack.Screen name="admin-order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#f5f5f5' } }} />
                         <Stack.Screen name="not-found" />
-                        <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
+                        <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' } }} />
                     </Stack>
                     <StatusBar style="dark" />
                 </BottomSheetModalProvider>
