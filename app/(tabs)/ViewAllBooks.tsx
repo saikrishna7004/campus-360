@@ -87,11 +87,13 @@ const ViewAllBooks = () => {
         className="border border-gray-300 p-2 mb-4 rounded-lg"
       />
       <FlatList
-        data={filteredBooks}
-        renderItem={renderBook}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      />
+  data={filteredBooks}
+  renderItem={renderBook}
+  keyExtractor={(item) => item._id}
+  contentContainerStyle={{ paddingBottom: 40 }} 
+  ListFooterComponent={<View className="h-10" />}
+/>
+
     </SafeAreaView>
   );
 };

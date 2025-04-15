@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, Image, TouchableOpacity, ScrollView, RefreshControl, Linking, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -28,6 +28,7 @@ const Library = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['50%', '75%'], []);
   const navigation = useNavigation();
@@ -73,6 +74,25 @@ const Library = () => {
     });
     return groups;
   }, [books]);
+
+  const filteredGroupedBooks = useMemo(() => {
+    if (!searchQuery.trim()) return groupedBooks;
+    const lowerQuery = searchQuery.toLowerCase();
+    const filtered: { [tag: string]: Book[] } = {};
+
+    Object.entries(groupedBooks).forEach(([tag, bookList]) => {
+      const tagMatches = tag.toLowerCase().includes(lowerQuery);
+      const filteredBooks = bookList.filter(book =>
+        book.title.toLowerCase().includes(lowerQuery)
+      );
+
+      if (tagMatches || filteredBooks.length > 0) {
+        filtered[tag] = tagMatches ? bookList : filteredBooks;
+      }
+    });
+
+    return filtered;
+  }, [groupedBooks, searchQuery]);
 
   const borrowBook = async (book: Book) => {
     if (userBooks.length >= 2) {
@@ -137,7 +157,15 @@ const Library = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <View className="px-4">
-            <Text className="text-2xl font-bold mb-4 text-black">Library</Text>
+            <Text className="text-3xl font-extrabold mb-3 text-black tracking-tight border-b border-gray-300 pb-2">Library</Text>
+
+            <TextInput
+              placeholder="Search books or categories..."
+              placeholderTextColor="#888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              className="bg-gray-100 px-4 py-2 rounded-lg mb-4 border border-gray-300 text-black"
+            />
 
             <Text className="text-xl font-bold mb-2 text-black">Books I'm Holding:</Text>
             <View className="mb-4">
@@ -160,10 +188,9 @@ const Library = () => {
               )}
             </View>
 
-            {/* 🔥 Grouped Horizontal Scrolls */}
-            {Object.entries(groupedBooks).map(([tag, booksUnderTag]) => (
+            {Object.entries(filteredGroupedBooks).map(([tag, booksUnderTag]) => (
               <View key={tag} className="mb-6">
-                <Text className="text-lg font-bold mb-2 text-black">{tag}</Text>
+                <Text className="text-xl font-bold mb-2 text-black tracking-wide border-l-4 border-blue-600 pl-2">{tag}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {booksUnderTag.slice(0, 6).map((item) => (
                     <TouchableOpacity
@@ -172,7 +199,12 @@ const Library = () => {
                       className="mr-4"
                     >
                       <Image source={{ uri: item.image }} className="h-40 w-28 rounded-lg" resizeMode="cover" />
-                      <Text className="text-sm font-semibold text-black mt-1" numberOfLines={1}>{item.title}</Text>
+                      <Text className="text-sm font-semibold text-black mt-1 w-28 text-center" numberOfLines={3}
+                      ellipsizeMode="tail">
+                        {item.title}
+                        </Text>
+
+
                     </TouchableOpacity>
                   ))}
 
@@ -211,14 +243,16 @@ const Library = () => {
             <View className="flex flex-row gap-2 items-center mt-4">
               {selectedBook.pdfUrl && (
                 <TouchableOpacity
-                  onPress={() => Alert.alert(
-                    'External Link',
-                    `You are about to visit an external link:\n\n${selectedBook.pdfUrl}\n\nDo you want to continue?`,
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'OK', onPress: () => Linking.openURL(selectedBook.pdfUrl as string) },
-                    ]
-                  )}
+                  onPress={() =>
+                    Alert.alert(
+                      'External Link',
+                      `You are about to visit an external link:\n\n${selectedBook.pdfUrl}\n\nDo you want to continue?`,
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'OK', onPress: () => Linking.openURL(selectedBook.pdfUrl as string) },
+                      ]
+                    )
+                  }
                   className="px-4 py-2 rounded-lg bg-blue-600"
                 >
                   <Text className="text-white font-semibold">View PDF</Text>
