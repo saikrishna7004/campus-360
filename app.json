@@ -2,7 +2,7 @@
   "expo": {
     "name": "Campus 360",
     "slug": "campus-360",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo-white.png",
     "scheme": "myapp",
@@ -70,6 +70,9 @@
     },
     "updates": {
       "url": "https://u.expo.dev/068e33e8-3b49-49ac-baa8-636eb1d21721"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
