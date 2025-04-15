@@ -18,7 +18,11 @@ export interface OrderItem {
 export interface Order {
     _id: string;
     orderId: string;
-    user: string;
+    user: {
+        _id: string;
+        name: string;
+        email: string;
+    };
     vendor: VendorType;
     items: OrderItem[];
     totalAmount: number;

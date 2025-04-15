@@ -1,10 +1,13 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import useOrderStore from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
+import { VENDOR_NAMES } from '@/constants/types';
+import { cn } from '@/lib/cn';
+import AppStatusBar from '@/components/AppStatusBar';
 
 export default function OrderDetails() {
     const { order } = useLocalSearchParams();
@@ -46,42 +49,59 @@ export default function OrderDetails() {
             }
             await Linking.openURL(url);
         } catch (error) {
-            // console.error('Error opening document:', error);
             Alert.alert('Error', 'Failed to open document. Please try again later.');
         }
     };
 
     return (
-        <ScrollView className="flex-1 bg-white">
-            <View className="p-4">
-                <Text className="text-2xl font-bold mb-2">Order #{orderData.orderId}</Text>
-                <Text className="text-gray-500">{new Date(orderData.createdAt).toLocaleString()}</Text>
+        <ScrollView className="flex-1 bg-gray-100">
+            <AppStatusBar />
+            <View className="mx-3 mt-4">
+                <View className="bg-white rounded-2xl p-4 mb-4">
+                    <Text className="text-lg font-bold mb-1">Order #{orderData.orderId}</Text>
+                    <Text className="text-gray-500 text-sm mb-3">{new Date(orderData.createdAt).toLocaleString()}</Text>
 
-                <View className="mt-6">
+                    <View className="border-t border-gray-100 pt-3">
+                        <Text className="font-medium text-gray-800 mb-2">Customer Details</Text>
+                        <Text className="text-gray-700">Name: {orderData.user.name || 'Anonymous'}</Text>
+                        <Text className="text-gray-600">Email: {orderData.user.email || 'N/A'}</Text>
+                    </View>
+                </View>
+
+                <View className="bg-white rounded-2xl p-4 mb-4">
+                    <Text className="font-medium text-gray-800 mb-3">Order Items</Text>
                     {orderData.items.map((item: any, index: number) => (
-                        <View key={index} className="mb-4 bg-gray-50 rounded-lg p-4">
-                            <Text className="text-lg font-semibold">{item.name}</Text>
-                            <Text className="text-gray-600">
-                                Quantity: {item.quantity} × ₹{item.price} = ₹{item.quantity * item.price}
-                            </Text>
+                        <View 
+                            key={index} 
+                            className={cn(
+                                "py-2",
+                                index !== orderData.items.length - 1 && "border-b border-gray-100"
+                            )}
+                        >
+                            <View className="flex-row justify-between">
+                                <View className="flex-1">
+                                    <Text className="text-gray-800 font-medium">{item.name}</Text>
+                                    <Text className="text-gray-600">Quantity: {item.quantity}</Text>
+                                </View>
+                                <Text className="text-gray-800 font-medium">₹{(item.price * item.quantity).toFixed(2)}</Text>
+                            </View>
                             
                             {item.isPrintItem && item.documentDetails && (
-                                <View className="mt-3 bg-blue-50 rounded-lg p-3">
-                                    <Text className="font-medium text-blue-800 mb-2">Print Details:</Text>
+                                <View className="mt-2 bg-blue-50 rounded-lg p-3">
                                     <View className="space-y-1">
-                                        <Text className="text-blue-700">• Type: {item.documentDetails.printingOptions.colorType === 'bw' ? 'Black & White' : 'Color'}</Text>
-                                        <Text className="text-blue-700">• Sides: {item.documentDetails.printingOptions.printSides === 'single' ? 'Single Sided' : 'Double Sided'}</Text>
-                                        <Text className="text-blue-700">• Copies: {item.documentDetails.printingOptions.numberOfCopies}</Text>
-                                        <Text className="text-blue-700">• Size: {item.documentDetails.printingOptions.pageSize}</Text>
-                                        <Text className="text-blue-700">• Pages: {item.documentDetails.printingOptions.numberOfPages}</Text>
+                                        <Text className="text-blue-700">
+                                            {item.documentDetails.printingOptions.colorType === 'bw' ? 'Black & White' : 'Color'} • 
+                                            {item.documentDetails.printingOptions.printSides === 'single' ? 'Single Sided' : 'Double Sided'} •
+                                            {item.documentDetails.printingOptions.numberOfCopies} copies
+                                        </Text>
                                     </View>
                                     {item.documentDetails?.url && (
                                         <TouchableOpacity 
                                             onPress={() => openDocument(item.documentDetails?.url)}
-                                            className="flex-row items-center mt-3 bg-blue-100 p-3 rounded-lg"
+                                            className="flex-row items-center mt-2 bg-blue-100 p-2 rounded-lg"
                                         >
-                                            <MaterialCommunityIcons name="file-pdf-box" size={24} color="#1e40af" />
-                                            <Text className="text-blue-800 ml-2 font-medium">Open Document</Text>
+                                            <MaterialCommunityIcons name="file-pdf-box" size={20} color="#1e40af" />
+                                            <Text className="text-blue-800 ml-2">Open Document</Text>
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -89,29 +109,47 @@ export default function OrderDetails() {
                         </View>
                     ))}
 
-                    <View className="mt-2 bg-gray-50 rounded-lg p-4">
-                        <Text className="text-lg font-bold">Total: ₹{orderData.totalAmount}</Text>
-                        <Text className="text-gray-600">Payment via {orderData.paymentMethod}</Text>
+                    <View className="border-t border-gray-100 mt-2 pt-4">
+                        <View className="flex-row justify-between items-center">
+                            <Text className="text-gray-800">Subtotal</Text>
+                            <Text className="text-gray-800">₹{(orderData.totalAmount - 2).toFixed(2)}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mt-2">
+                            <Text className="text-gray-800">Platform Fee</Text>
+                            <Text className="text-gray-800">₹2.00</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mt-4 pt-2 border-t border-gray-100">
+                            <Text className="font-bold">Total</Text>
+                            <Text className="font-bold">₹{orderData.totalAmount.toFixed(2)}</Text>
+                        </View>
                     </View>
+                </View>
 
-                    <View className="flex-row justify-end space-x-3 mt-6">
-                        {orderData.status === 'preparing' && (
-                            <TouchableOpacity
-                                onPress={() => handleUpdateStatus('ready')}
-                                className="bg-green-600 px-4 py-2 rounded-lg"
-                            >
-                                <Text className="text-white font-medium">Mark Ready</Text>
-                            </TouchableOpacity>
-                        )}
-                        {orderData.status === 'ready' && (
-                            <TouchableOpacity
-                                onPress={() => handleUpdateStatus('completed')}
-                                className="bg-blue-600 px-4 py-2 rounded-lg"
-                            >
-                                <Text className="text-white font-medium">Complete</Text>
-                            </TouchableOpacity>
-                        )}
+                <View className="bg-white rounded-2xl p-4 mb-4">
+                    <Text className="font-medium text-gray-800 mb-2">Payment Details</Text>
+                    <View className="flex-row items-center">
+                        <FontAwesome name="google-wallet" size={20} color="#16a34a" />
+                        <Text className="text-gray-700 ml-2">{orderData.paymentMethod}</Text>
                     </View>
+                </View>
+
+                <View className="bg-white rounded-2xl p-4 mb-6">
+                    {orderData.status === 'preparing' && (
+                        <TouchableOpacity
+                            onPress={() => handleUpdateStatus('ready')}
+                            className="bg-green-700 py-3 rounded-lg"
+                        >
+                            <Text className="text-white font-medium text-center">Mark as Ready</Text>
+                        </TouchableOpacity>
+                    )}
+                    {orderData.status === 'ready' && (
+                        <TouchableOpacity
+                            onPress={() => handleUpdateStatus('completed')}
+                            className="bg-blue-600 py-3 rounded-lg"
+                        >
+                            <Text className="text-white font-medium text-center">Complete Order</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </ScrollView>

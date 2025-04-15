@@ -52,37 +52,17 @@ export default function RootLayout() {
                         <Stack.Screen name="index" options={{ headerShown: false, title: 'Home' }} />
                         <Stack.Screen name="login" options={{ headerShown: false }} />
                         <Stack.Screen name="register" options={{ headerShown: false }} />
-                        <Stack.Screen name="profile" options={{ headerTitle: "Profile", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
+                        <Stack.Screen name="profile" options={{ headerTitle: "Profile", headerStyle: { backgroundColor: '#ffffff' }}} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                        <Stack.Screen name="order-confirmation" options={{ headerTitle: "Order Confirmation", headerStyle: { backgroundColor: '#f5f5f5' }, headerTintColor: '#166534' }} />
-                        <Stack.Screen 
-                            name="admin/(tabs)/order-details" 
-                            options={{ 
-                                headerShown: true,
-                                headerTitle: "Order Details",
-                                headerStyle: { backgroundColor: '#f5f5f5' },
-                                presentation: 'modal'
-                            }} 
-                        />
-                        <Stack.Screen 
-                            name="admin/news" 
-                            options={{ 
-                                headerShown: true,
-                                headerTitle: "News Management",
-                                headerStyle: { backgroundColor: '#f5f5f5' }
-                            }} 
-                        />
-                        <Stack.Screen 
-                            name="news" 
-                            options={{ 
-                                headerShown: true,
-                                headerTitle: "News",
-                                headerStyle: { backgroundColor: '#f5f5f5' }
-                            }} 
-                        />
-                        <Stack.Screen name="admin-order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#f5f5f5' } }} />
+                        <Stack.Screen name="order-confirmation" options={{ headerTitle: "Order Confirmation", headerStyle: { backgroundColor: '#ffffff' }}} />
+                        <Stack.Screen name="order-details" options={{ headerTitle: "Order Details", headerShown: true, headerStyle: { backgroundColor: '#ffffff' }}} />
+                        <Stack.Screen name="my-orders" options={{ headerTitle: "My Orders", headerShown: true, headerStyle: { backgroundColor: '#ffffff' }}} />
+                        <Stack.Screen name="admin/(tabs)/order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#ffffff' }, presentation: 'modal'}} />
+                        <Stack.Screen name="admin/news" options={{ headerShown: true, headerTitle: "News Management", headerStyle: { backgroundColor: '#ffffff' }}} />
+                        <Stack.Screen name="news" options={{ headerShown: true, headerTitle: "News", headerStyle: { backgroundColor: '#ffffff' }}} />
+                        <Stack.Screen name="admin-order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#ffffff' } }} />
                         <Stack.Screen name="not-found" />
-                        <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#f5f5f5' } }} />
+                        <Stack.Screen name="forgot-password" options={{ headerTitle: "Reset Password", headerStyle: { backgroundColor: '#ffffff' } }} />
                     </Stack>
                     <StatusBar style="dark" />
                 </BottomSheetModalProvider>

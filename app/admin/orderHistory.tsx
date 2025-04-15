@@ -18,6 +18,7 @@ type OrderHistoryData = {
                 name: string;
                 price: number;
             };
+            name?: string;
             quantity: number;
             price: number;
         }>;
@@ -192,7 +193,9 @@ const OrderHistory = () => {
                                     
                                     {order.items.map((item, index) => (
                                         <View key={index} className="flex-row justify-between items-end py-1">
-                                            <Text className="flex-1 mr-2" numberOfLines={2}>{item.quantity} x {item.productId.name}</Text>
+                                            <Text className="flex-1 mr-2" numberOfLines={2}>
+                                                {item.quantity} x {item.name}
+                                            </Text>
                                             <Text>{formatCurrency(item.price * item.quantity)}</Text>
                                         </View>
                                     ))}

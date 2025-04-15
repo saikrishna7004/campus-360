@@ -1,54 +1,17 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, RefreshControl, Dimensions, StatusBar, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, RefreshControl, Dimensions, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ExternalPathString, Link, Redirect, RelativePathString, useRouter } from 'expo-router';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import useAuthStore from '@/store/authStore';
 import CartSummary from '@/components/Cart';
-import { adminOptions, studentOptions, vendorOptions } from '@/constants/types';
+import { adminOptions, EXTERNAL_LINKS, studentOptions, vendorOptions } from '@/constants/types';
 import Sidebar from '@/components/Sidebar';
 import { Icon } from '@roninoss/icons';
 import { NewsItem } from '@/types/news';
+import AppStatusBar from '@/components/AppStatusBar';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
-const EXTERNAL_LINKS = [
-    {
-        name: 'Netra',
-        icon: 'http://kmit-netra.teleuniv.in/assets/sanjaya_about-DDG5ALmJ.png',
-        url: 'http://kmit-netra.teleuniv.in',
-    },
-    {
-        name: 'Sanjaya',
-        icon: 'http://kmit-netra.teleuniv.in/assets/sanjaya_about-DDG5ALmJ.png',
-        url: 'http://kmit-sanjaya.teleuniv.in',
-    },
-    {
-        name: 'Tesseract',
-        icon: 'https://tesseractonline.com/favicon-orange.png',
-        url: 'https://tesseractonline.com',
-    },
-    {
-        name: 'KMIT',
-        icon: 'https://kmit.in/favicon.ico',
-        url: 'https://kmit.in',
-    },
-    {
-        name: 'KMIT Alumni',
-        icon: 'https://media.almabaseapp.com/268/meta/KMIT.png',
-        url: 'https://alumni.kmit.in',
-    },
-    {
-        name: 'Telescope',
-        icon: 'http://kmitonline.com/theme/image.php/universo/theme/1739203259/favicon',
-        url: 'http://kmitonline.com/login/index.php',
-    },
-    {
-        name: 'Alumnx',
-        icon: 'https://alumnx.com/logo.png',
-        url: 'https://play.google.com/store/apps/details?id=com.alumnx.app&hl=en_IN&pli=1',
-    },
-];
 
 const Home = () => {
     const { isAuthenticated, user, logout } = useAuthStore();
@@ -135,7 +98,7 @@ const Home = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top', 'left', 'right']}>
-            <StatusBar barStyle="dark-content" />
+            <AppStatusBar />
 
             <View className="flex-row align-items-center p-4" style={styles.header}>
                 <TouchableOpacity onPress={openSidebar}>

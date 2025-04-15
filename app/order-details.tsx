@@ -9,6 +9,7 @@ import useAuthStore from '@/store/authStore';
 import * as NavigationBar from 'expo-navigation-bar';
 import { VendorType } from '@/store/cartStore';
 import { VENDOR_NAMES } from '@/constants/types';
+import AppStatusBar from '@/components/AppStatusBar';
 
 const OrderDetails = () => {
     const { orderId } = useLocalSearchParams<{ orderId: string }>();
@@ -93,11 +94,11 @@ const OrderDetails = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
-            <StatusBar style="dark" />
+        <SafeAreaView className="flex-1 bg-gray-100" style={{ paddingTop: -28 }} edges={['top', 'left', 'right']}>
+            <AppStatusBar />
 
             <ScrollView
-                className="flex-1"
+                className="flex-1 p-4"
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -107,7 +108,7 @@ const OrderDetails = () => {
                     />
                 }
             >
-                <View className="bg-white p-4 mb-4">
+                <View className="bg-white p-4 mb-4 rounded-lg">
                     <View className="flex-row justify-between items-center mb-2">
                         <Text className="font-bold text-lg">
                             {VENDOR_NAMES[order.vendor as VendorType]}
@@ -141,16 +142,16 @@ const OrderDetails = () => {
                     </View>
                 </View>
 
-                <View className="bg-white p-4 mb-4">
+                <View className="bg-white p-4 mb-4 rounded-lg">
                     <Text className="font-medium mb-3">Order Items</Text>
 
                     {order.items.map((item, index) => (
                         <View key={index} className="flex-row justify-between mb-3 items-center align-center">
-                            <View className="flex-row items-center align-center">
+                            <View className="flex-row items-center align-center w-[75%]">
                                 <View className="h-6 w-6 bg-green-100 rounded-full items-center justify-center mr-2">
                                     <Text className="text-green-800 text-xs">{item.quantity}x</Text>
                                 </View>
-                                <Text className="text-gray-800">{item.name}</Text>
+                                <Text className="text-gray-800" numberOfLines={3}>{item.name}</Text>
                             </View>
                             <Text className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</Text>
                         </View>

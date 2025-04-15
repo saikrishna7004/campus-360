@@ -6,6 +6,7 @@ import useOrderStore, { Order } from '@/store/orderStore';
 import useAuthStore from '@/store/authStore';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import AppStatusBar from '@/components/AppStatusBar';
 
 const Orders = () => {
     const [activeTab, setActiveTab] = useState<'preparing' | 'ready'>('preparing');
@@ -56,14 +57,14 @@ const Orders = () => {
     const filteredOrders = useMemo(() => orders.filter(order => order.status === activeTab), [orders, activeTab]);
 
     return (
-        <SafeAreaView className="flex-1 bg-white -mt-2" edges={['top', 'left', 'right']}>
-            <StatusBar style="inverted" />
-            <View className="flex-row gap-4 px-4">
+        <SafeAreaView className="flex-1 bg-gray-100" style={{ paddingTop: -28 }} edges={['top', 'left', 'right']}>
+            <AppStatusBar />
+            <View className="flex-row bg-white p-2 mb-2">
                 {['preparing', 'ready'].map(tab => (
                     <TouchableOpacity 
                         key={tab}
                         onPress={() => setActiveTab(tab as 'preparing' | 'ready')} 
-                        className={`rounded-xl border py-2 px-4 ${activeTab === tab ? 'border-green-800 bg-green-50' : 'border-gray-200'}`}
+                        className={`flex-1 py-2 items-center rounded-md ${activeTab === tab ? 'bg-green-50' : 'border-gray-200'}`}
                     >
                         <Text className={`${activeTab === tab ? 'font-bold text-green-800' : ''}`}>
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -98,8 +99,13 @@ const Orders = () => {
                                 className="bg-white rounded-xl shadow-sm mb-4 p-4 border border-gray-100"
                             >
                                 <View className="flex-row justify-between mb-2">
-                                    <Text className="font-bold text-lg">Order #{order.orderId}</Text>
-                                    <Text className="text-gray-500">
+                                    <View>
+                                        <Text className="font-bold">Order #{order.orderId}</Text>
+                                        <Text className="text-sm text-gray-600">
+                                            {order.user.name || 'Anonymous Customer'}
+                                        </Text>
+                                    </View>
+                                    <Text className="text-gray-500 text-sm">
                                         {new Date(order.createdAt).toLocaleTimeString()}
                                     </Text>
                                 </View>
@@ -109,7 +115,7 @@ const Orders = () => {
                                         <View key={index} className="mb-2">
                                             <View className="flex-row justify-between items-start">
                                                 <View className="flex-1">
-                                                    <Text className="text-base font-medium pr-2">
+                                                    <Text className="text-sm pr-2">
                                                         {item.name} x{item.quantity}
                                                     </Text>
                                                     {item.isPrintItem && item.documentDetails && (
@@ -121,7 +127,7 @@ const Orders = () => {
                                                         </View>
                                                     )}
                                                 </View>
-                                                <Text className="text-base text-right ml-2">
+                                                <Text className="text-sm text-right ml-2">
                                                     ₹{(item.price * item.quantity).toFixed(2)}
                                                 </Text>
                                             </View>
@@ -131,8 +137,8 @@ const Orders = () => {
                                     <View className="border-t border-gray-200 my-3" />
                                     
                                     <View className="flex-row justify-between mb-4">
-                                        <Text className="text-lg font-bold">Total:</Text>
-                                        <Text className="text-lg font-bold text-right w-20 truncate">
+                                        <Text className="font-bold">Total:</Text>
+                                        <Text className="font-bold text-right w-20 truncate">
                                             ₹{order.totalAmount.toFixed(2)}
                                         </Text>
                                     </View>
