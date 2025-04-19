@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
+import { Platform } from 'react-native';
 
 export type UserRole = 'student' | 'admin' | 'vendor';
 export type VendorType = 'food' | 'stationery' | 'other';
@@ -26,17 +27,31 @@ interface AuthState {
     logout: () => void;
     getAuthHeader: () => { Authorization: string } | {};
     loadUser: (authHeader: Record<string, string>) => Promise<void>;
+    refreshToken: () => Promise<boolean>;
+    verifyToken: () => Promise<void>;
 }
 
 const zustandStorage = {
     getItem: async (name: string): Promise<string | null> => {
-        return await SecureStore.getItemAsync(name);
+        if (Platform.OS === 'web') {
+            return localStorage.getItem(name);
+        } else {
+            return await SecureStore.getItemAsync(name);
+        }
     },
     setItem: async (name: string, value: string): Promise<void> => {
-        await SecureStore.setItemAsync(name, value);
+        if (Platform.OS === 'web') {
+            localStorage.setItem(name, value);
+        } else {
+            await SecureStore.setItemAsync(name, value);
+        }
     },
     removeItem: async (name: string): Promise<void> => {
-        await SecureStore.deleteItemAsync(name);
+        if (Platform.OS === 'web') {
+            localStorage.removeItem(name);
+        } else {
+            await SecureStore.deleteItemAsync(name);
+        }
     },
 };
 
@@ -142,6 +157,39 @@ const useAuthStore = create<AuthState>()(
                         isLoading: false,
                         error: 'Failed to load user',
                     });
+                }
+            },
+
+            verifyToken: async () => {
+                const { token } = get();
+                if (!token) return;
+                
+                try {
+                    const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/verify_token`, { token });
+                    const { user, newToken } = response.data;
+                    set({ user, token: newToken, isAuthenticated: true, error: null });
+                } catch (error) {
+                    set({ 
+                        user: null, 
+                        token: null, 
+                        isAuthenticated: false,
+                        error: 'Session expired. Please login again.'
+                    });
+                }
+            },
+
+            refreshToken: async () => {
+                const { token } = get();
+                if (!token) return false;
+
+                try {
+                    const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/verify_token`, { token });
+                    const { user, newToken } = response.data;
+                    set({ user, token: newToken, isAuthenticated: true });
+                    return true;
+                } catch (error) {
+                    set({ user: null, token: null, isAuthenticated: false });
+                    return false;
                 }
             }
         }),

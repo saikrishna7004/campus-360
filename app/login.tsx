@@ -51,7 +51,7 @@ const Login = () => {
                         <Text className="text-sm text-gray-500 mt-1">Your one-stop campus solution</Text>
                     </View>
 
-                    <View className="bg-white rounded-lg shadow-sm">
+                    <View className="bg-white rounded-lg">
                         <View className="mb-3">
                             <Text className="text-gray-700 mb-1 ml-1 font-medium">Email</Text>
                             <TextInput

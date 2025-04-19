@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
@@ -19,7 +19,8 @@ export default function RootLayout() {
     });
 
     const { fetchCartFromCloud } = useCartStore();
-    const { isAuthenticated, getAuthHeader } = useAuthStore();
+    const { isAuthenticated, token, verifyToken, getAuthHeader } = useAuthStore();
+    const router = useRouter();
 
     useEffect(() => {
         if (loaded) {
@@ -28,7 +29,7 @@ export default function RootLayout() {
     }, [loaded]);
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (token && isAuthenticated) {
             const loadCart = async () => {
                 try {
                     await fetchCartFromCloud(getAuthHeader());
@@ -38,7 +39,13 @@ export default function RootLayout() {
             };
             loadCart();
         }
-    }, [isAuthenticated]);
+    }, [token, isAuthenticated]);
+
+    useEffect(() => {
+        if (token) {
+            verifyToken();
+        }
+    }, [token]);
 
     if (!loaded) {
         return null;
@@ -57,8 +64,6 @@ export default function RootLayout() {
                         <Stack.Screen name="order-confirmation" options={{ headerTitle: "Order Confirmation", headerStyle: { backgroundColor: '#ffffff' }}} />
                         <Stack.Screen name="order-details" options={{ headerTitle: "Order Details", headerShown: true, headerStyle: { backgroundColor: '#ffffff' }}} />
                         <Stack.Screen name="my-orders" options={{ headerTitle: "My Orders", headerShown: true, headerStyle: { backgroundColor: '#ffffff' }}} />
-                        <Stack.Screen name="admin/(tabs)/order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#ffffff' }, presentation: 'modal'}} />
-                        <Stack.Screen name="admin/news" options={{ headerShown: true, headerTitle: "News Management", headerStyle: { backgroundColor: '#ffffff' }}} />
                         <Stack.Screen name="news" options={{ headerShown: true, headerTitle: "News", headerStyle: { backgroundColor: '#ffffff' }}} />
                         <Stack.Screen name="admin-order-details" options={{ headerShown: true, headerTitle: "Order Details", headerStyle: { backgroundColor: '#ffffff' } }} />
                         <Stack.Screen name="not-found" />
